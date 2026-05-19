@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Claude Code internal files
+.claude/
+
+# Runtime / generated data (created by sync scripts)
+data/restaurants.db
+data/geocode_cache.sqlite
+data/raisin_sync.log
+data/*.json
+
+# Misc
+main.py

@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Restavracija Majerca",
+    "address": "Stara Fužina, Bohinj",
+    "city": "Stara Fužina",
+    "region": "Bohinj",
+    "country": "Slovenia",
+    "url": "https://guide.michelin.com/si/en/article/dining-out/from-bohinj-to-kranjska-gora---two-local-restaurants-in-the-heart-of-the-triglav-national-park",
+    "description": "Chef Jure Rožič's restaurant in the heart of Bohinj inside the Triglav National Park. Hyper-local cuisine: red deer tartare, sweetcorn soup, fermented vegetables, lake fish and game from small local producers. Garden kitchen for grilled dishes in summer.",
+    "tags": [
+      "bohinj",
+      "michelin-selected",
+      "slovenian"
+    ]
+  },
+  {
+    "name": "Restaurant Triangel",
+    "address": "Triangel Boutique Hotel, Gozd Martuljek",
+    "city": "Gozd Martuljek",
+    "region": "Kranjska Gora",
+    "country": "Slovenia",
+    "url": "https://guide.michelin.com/si/en/article/dining-out/from-bohinj-to-kranjska-gora---two-local-restaurants-in-the-heart-of-the-triglav-national-park",
+    "description": "Chef Jon Zupan revives heritage Gorenjska recipes inside the Triangel Boutique Hotel in the Upper Sava valley. Mavželj with truffles and Mohant cheese, Zgornjesavski Esihflaš beef salad, Telečja Obara veal stew. All-Slovenian wine list.",
+    "tags": [
+      "kranjska-gora",
+      "michelin-selected",
+      "slovenian"
+    ]
+  }
+]

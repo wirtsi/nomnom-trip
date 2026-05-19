@@ -1,0 +1,100 @@
+[
+  {
+    "name": "Gostišče Tulipan",
+    "address": "Lesce",
+    "city": "Lesce",
+    "region": "Bled",
+    "country": "Slovenia",
+    "url": "https://julian-alps.com/en/p/experience-the-flavours-of-the-julian-alps/801684949/",
+    "description": "Traditionally furnished restaurant in Lesce serving original Slovenian dishes, some rooted in family recipes. Renowned for venison specialities.",
+    "tags": [
+      "bled",
+      "slovenian",
+      "traditional"
+    ]
+  },
+  {
+    "name": "Briška Hiša",
+    "address": "Brda (vineyards)",
+    "city": "Brda",
+    "region": "Brda",
+    "country": "Slovenia",
+    "url": "https://julian-alps.com/en/p/experience-the-flavours-of-the-julian-alps/801684949/",
+    "description": "Charming restaurant in the Brda vineyards offering Slovenian cuisine with Italian accents, well-curated local wine selection and cosy ambience.",
+    "tags": [
+      "brda",
+      "wine",
+      "slovenian"
+    ]
+  },
+  {
+    "name": "Gostilna Pri Planincu",
+    "address": "Bled",
+    "city": "Bled",
+    "region": "Bled",
+    "country": "Slovenia",
+    "url": "https://julian-alps.com/en/p/experience-the-flavours-of-the-julian-alps/801684949/",
+    "description": "Third-generation family inn in Bled inside a traditional house, with a menu showcasing local Slovenian favourites.",
+    "tags": [
+      "bled",
+      "slovenian",
+      "traditional"
+    ]
+  },
+  {
+    "name": "Merjasec Alpine Hut",
+    "address": "Top of Vogel cable car, Bohinj",
+    "city": "Bohinj",
+    "region": "Bohinj",
+    "country": "Slovenia",
+    "url": "https://julian-alps.com/en/p/experience-the-flavours-of-the-julian-alps/801684949/",
+    "description": "Accessible mountain hut at the top of Vogel above Lake Bohinj. Stunning mountain views, Shepherd's lunch and hearty veal stew.",
+    "tags": [
+      "bohinj",
+      "mountain-hut",
+      "alpine"
+    ]
+  },
+  {
+    "name": "Bovec kitch'n",
+    "address": "Bovec",
+    "city": "Bovec",
+    "region": "Bovec",
+    "country": "Slovenia",
+    "url": "https://julian-alps.com/en/p/experience-the-flavours-of-the-julian-alps/801684949/",
+    "description": "Tiny food stand in Bovec where father and daughter serve traditional Slovenian dishes with carefully curated ingredients. Quick local lunches to go.",
+    "tags": [
+      "bovec",
+      "street-food",
+      "slovenian"
+    ]
+  },
+  {
+    "name": "Kosobrin",
+    "address": "Kranjska Gora",
+    "city": "Kranjska Gora",
+    "region": "Kranjska Gora",
+    "country": "Slovenia",
+    "url": "https://julian-alps.com/en/p/experience-the-flavours-of-the-julian-alps/801684949/",
+    "description": "Wooden cabin in Kranjska Gora with cosy environment and short menu of hearty Slovenian fare; quick service for a fast lunch stop.",
+    "tags": [
+      "kranjska-gora",
+      "slovenian",
+      "casual"
+    ]
+  },
+  {
+    "name": "Fritula",
+    "address": "Town square, Radovljica",
+    "city": "Radovljica",
+    "region": "Radovljica",
+    "country": "Slovenia",
+    "url": "https://julian-alps.com/en/p/experience-the-flavours-of-the-julian-alps/801684949/",
+    "description": "Dessert stop in Radovljica serving traditional fried miške / fritula, eaten warm while strolling through the town square.",
+    "tags": [
+      "radovljica",
+      "dessert",
+      "street-food"
+    ]
+  }
+]

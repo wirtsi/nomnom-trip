@@ -1,0 +1,54 @@
+{
+  "entries": [
+    {
+      "name": "Quellenhof Gourmet-Stube 1897",
+      "address": "Pseirerstraße 20, 39010 Riffian, Südtirol, Italy",
+      "city": "Riffian (Rifiano)",
+      "region": "South Tyrol",
+      "country": "Italy",
+      "url": "https://www.falstaff.com/en/restaurants/restaurant/quellenhof-gourmet-stube-1897-0cf46cc0-d8e3-49b2-974a-0a0e7de6ba3b/",
+      "description": "Michelin 1 star (2026 newcomer). Family-run hotel restaurant in Val Passiria/Passeier Valley. Chef Michael Mayr. Alpine ingredients.",
+      "tags": ["south-tyrol", "michelin", "1-star", "alpine", "falstaff"]
+    },
+    {
+      "name": "Ristorante Porcino",
+      "address": "Via Runch 8, 39030 San Cassiano, Alta Badia, Südtirol, Italy",
+      "city": "San Cassiano (St. Kassian)",
+      "region": "South Tyrol (Alta Badia)",
+      "country": "Italy",
+      "url": "https://www.falstaff.com/en/restaurants/restaurant/porcino-mountain-cottage-88d8fe7b-a7c9-4f6f-a8a3-7e5f4f22b14c/",
+      "description": "Michelin 1 star (2026 newcomer). Chef Marco Verginer. 'Mountain cottage' style in the Dolomites of Alta Badia.",
+      "tags": ["south-tyrol", "michelin", "1-star", "alpine", "falstaff"]
+    },
+    {
+      "name": "Atelier Moessmer",
+      "address": "Am Sandplatz 1, 39031 Brunico, Südtirol, Italy",
+      "city": "Brunico (Bruneck)",
+      "region": "South Tyrol",
+      "country": "Italy",
+      "url": "https://www.luxurylifestylemag.co.uk/food-and-drink/a-south-tyrolean-guide-to-michelin-star-dining-in-the-dolomites/",
+      "description": "Led by 3-Michelin and Green-starred chef Norbert Niederkofler. Extraordinary culinary destination. Bold, boundary-pushing alpine cuisine.",
+      "tags": ["south-tyrol", "michelin", "3-star", "green-star", "alpine"]
+    },
+    {
+      "name": "Gelateria Cristallino",
+      "address": "Dreisprachenstraße 8, 39031 Brunico, Südtirol, Italy",
+      "city": "Brunico (Bruneck)",
+      "region": "South Tyrol",
+      "country": "Italy",
+      "url": "https://www.facebook.com/groups/hikedolomites/posts/2610222932679747/",
+      "description": "Artisan gelato in the heart of Brunico. Popular stop near the Dolomites.",
+      "tags": ["south-tyrol", "gelato", "artisan", "dolomites"]
+    },
+    {
+      "name": "Caffè Moessmer",
+      "address": "Am Sandplatz 1, 39031 Brunico, Südtirol, Italy",
+      "city": "Brunico (Bruneck)",
+      "region": "South Tyrol",
+      "country": "Italy",
+      "url": "https://www.moessmer.com/",
+      "description": "Café and gelato bar attached to the Moessmer hotel. Part of the Niederkofler hospitality group.",
+      "tags": ["south-tyrol", "gelato", "coffee", "luxury"]
+    }
+  ]
+}

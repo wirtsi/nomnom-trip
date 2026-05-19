@@ -1,0 +1,264 @@
+{
+  "entries": [
+    {
+      "name": "Armando Al Pantheon",
+      "address": "Salita de' Crescenzi 31, Centro Storico, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "Six decades of family ownership. Book ahead—toughest last-minute reservation in Rome. Order: rigatoni amatriciana, spaghetti alla carbonara, saltimbocca alla romana, tripe in tomato. Closed Sundays.",
+      "tags": ["rome", "centro-storico", "classic", "infatuation"]
+    },
+    {
+      "name": "La Tavernaccia Da Bruno",
+      "address": "Via Giovanni da Castelbolognese 63, Trastevere, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "Trastevere institution. Time-capsule trattoria with a novel-length wine list. Order: eggplant parmigiana, coda alla vaccinara, maialino, Sunday lasagna, torta caprese.",
+      "tags": ["rome", "trastevere", "classic", "infatuation"]
+    },
+    {
+      "name": "Trattoria Da Enzo Al 29",
+      "address": "Via dei Vascellari 29, Trastevere, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "Perpetual line out the door. Killer carbonara and artichokes. Aperol spritz while you wait.",
+      "tags": ["rome", "trastevere", "classic", "infatuation"]
+    },
+    {
+      "name": "Pecorino",
+      "address": "Via Galvani 64, Testaccio, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "White-tablecloth Roman trattoria in Testaccio with sarcastic waiters. Order: carbonara, maltagliati con carciofi, zabaione cake. Sunday lunch feels like family.",
+      "tags": ["rome", "testaccio", "classic", "infatuation"]
+    },
+    {
+      "name": "Ristorante Rocco",
+      "address": "Via Giovanni Lanza 93, Monti, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "Single dinner seating, cursive chalkboard specials. Polished terrazzo, relaxed enough for celebrities. Order: cacio e pepe.",
+      "tags": ["rome", "monti", "upscale", "infatuation"]
+    },
+    {
+      "name": "La Matriciana Dal 1870",
+      "address": "Via del Viminale 44, Esquilino, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "Since 1870, across from the Opera House. Sharp waiters, local crowd. Order: prosciutto from the bone, fresh Campania mozzarella, velvety gricia, tortellini in brodo.",
+      "tags": ["rome", "esquilino", "classic", "infatuation"]
+    },
+    {
+      "name": "Romanè",
+      "address": "Via Cipro 106, Prati, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "From the Trapizzino team. Lace placemats, painted ceramic plates. Order: ultra-creamy carbonara with crispy guanciale; excellent biodynamic wine list.",
+      "tags": ["rome", "prati", "modern-roman", "infatuation"]
+    },
+    {
+      "name": "Dar Filettaro",
+      "address": "Largo dei Librari 88, Campo de' Fiori, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-rome-restaurants",
+      "description": "Iconic baccalà (crispy fried salted cod) + puntarelle on a lively piazza. Cheap eats, sit outside.",
+      "tags": ["rome", "campo-de-fiori", "street-food", "seafood", "infatuation"]
+    },
+    {
+      "name": "Pulejo",
+      "address": "Via Giovanni da Castelbolognese, Prati, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/reviews/pulejo",
+      "description": "Infatuation reviewed Prati spot. Italian cooking in a stylish setting.",
+      "tags": ["rome", "prati", "infatuation"]
+    },
+    {
+      "name": "Fraschetta Da Sandro",
+      "address": "Via dei Vascellari, Testaccio, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/reviews/fraschetta-da-sandro",
+      "description": "Testaccio fraschetta. Infatuation-reviewed Italian trattoria.",
+      "tags": ["rome", "testaccio", "infatuation"]
+    },
+    {
+      "name": "Trapizzino Testaccio",
+      "address": "Piazza Testaccio, Testaccio, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/reviews/trapizzino-testaccio",
+      "description": "The original street-corner pizza-pocket temple. Order: supplì, trippa alla romana, pollo alla cacciatora stuffed in pizza dough pockets.",
+      "tags": ["rome", "testaccio", "street-food", "infatuation"]
+    },
+    {
+      "name": "Giolitti",
+      "address": "Via degli Uffici del Vicario 40, Pantheon, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Since 1900. Legendary gelateria near the Pantheon. Order: pistachio + zabaione. Bright green signage, impossible to miss.",
+      "tags": ["rome", "pantheon", "gelato", "historic", "infatuation"]
+    },
+    {
+      "name": "Fiordiluna",
+      "address": "Via della Lungaretta 96, Trastevere, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Trastevere locals' favorite. Order: mascarpone with chocolate & biscuit, pistachio, yogurt. Homemade jams to take home.",
+      "tags": ["rome", "trastevere", "gelato", "infatuation"]
+    },
+    {
+      "name": "Gelateria Del Teatro",
+      "address": "Via dei Coronari 65, Ponte, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Creative flavors in a 4-min walk from Piazza Navona. Order: white chocolate & basil, dark chocolate + Nero d'Avola wine. Also granita.",
+      "tags": ["rome", "ponte", "gelato", "infatuation"]
+    },
+    {
+      "name": "Otaleg",
+      "address": "Via di San Cosimato 14, Trastevere, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Name = 'gelato' backwards. Founded by a pioneer of gourmet gelato. Order: pistachio + dark chocolate, stracciatella. Seasonal dairy-free fruit flavors.",
+      "tags": ["rome", "trastevere", "gelato", "infatuation"]
+    },
+    {
+      "name": "Neve Di Latte",
+      "address": "Via dei Banchi Vecchi 140, Centro Storico, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Milk from Upper Bavaria. Order: Sicilian ricotta with candied orange & chocolate, chestnut cream, sour cherry with chocolate and nuts.",
+      "tags": ["rome", "centro-storico", "gelato", "infatuation"]
+    },
+    {
+      "name": "Gelateria Fassi (Palazzo del Freddo)",
+      "address": "Via Principe Eugenio 65, Esquilino, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Since 1880. Rome's oldest gelato. Family museum vibe. Order: zabaione, vanilla bourbon with peanuts & cocoa nibs. Fall: persimmon flavor.",
+      "tags": ["rome", "esquilino", "gelato", "historic", "infatuation"]
+    },
+    {
+      "name": "Fatamorgana Gelato",
+      "address": "Via dei Chiavari 37A, Campo de' Fiori, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Around the corner from Roscioli. Rotating flavors. Order: Bronte pistachio, milk-mint-chocolate—mint so fresh it beats Listerine.",
+      "tags": ["rome", "campo-de-fiori", "gelato", "infatuation"]
+    },
+    {
+      "name": "Il Gelato Di Claudio Torcè",
+      "address": "Viale Aventino 59, Circo Massimo, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "4 shops across the city. Order: black sesame with salted caramel, ricotta with saffron, halva gelato. Favorite: salted chocolate with pink Himalayan salt.",
+      "tags": ["rome", "aventino", "gelato", "infatuation"]
+    },
+    {
+      "name": "Gelateria Dei Gracchi",
+      "address": "Via dei Gracchi 272, Prati, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-gelato-rome",
+      "description": "Near the Vatican. Order: ricotta & pear, toasted almond with candied orange. Vegan pistachio is ultra-creamy.",
+      "tags": ["rome", "prati", "gelato", "vegan", "infatuation"]
+    },
+    {
+      "name": "Antico Forno Roscioli",
+      "address": "Via dei Chiavari 34, Campo de' Fiori, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-bakeries-rome",
+      "description": "The Roscioli dynasty's bakery. Order: pizza rossa, pizza con patate with porchetta, supplì, ciambelline, ricotta chocolate chip crostata, maritozzo.",
+      "tags": ["rome", "campo-de-fiori", "bakery", "pizza", "infatuation"]
+    },
+    {
+      "name": "Pasticceria Boccione",
+      "address": "Via del Portico d'Ottavia 1, Jewish Ghetto, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-bakeries-rome",
+      "description": "Only remaining kosher bakery in the historic Jewish Ghetto. Run by kind sisters. Order: ricotta & wild cherry tart, pizza ebraica. Don't mind the cracked crust—it's part of the charm.",
+      "tags": ["rome", "jewish-ghetto", "bakery", "kosher", "infatuation"]
+    },
+    {
+      "name": "Pasticceria Regoli",
+      "address": "Via Dello Statuto 60, Esquilino, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-bakeries-rome",
+      "description": "Century-old institution near Termini. Opens 6:30AM—sold out by noon. Order: maritozzo (mountain of whipped cream), wild strawberry tarts, pistachio cream-filled cornetti.",
+      "tags": ["rome", "esquilino", "bakery", "pastry", "infatuation"]
+    },
+    {
+      "name": "Forno Campo De' Fiori",
+      "address": "Campo de' Fiori 22, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-bakeries-rome",
+      "description": "Behind the flower sellers. Order: pizza al taglio, pizza bianca with tomato or thinly sliced potatoes, pizza stuffed with mortadella or zucchini flowers, reginelle sesame cookies.",
+      "tags": ["rome", "campo-de-fiori", "bakery", "street-food", "infatuation"]
+    },
+    {
+      "name": "Panificio Marè Prati",
+      "address": "Viale Angelico 88, Prati, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-bakeries-rome",
+      "description": "Bread so good Trecca serves it at their tables. Order: pizza rossa (crispy, sweet-tangy tomato), lingue di gatto biscuits, strudel, jam-filled crostata.",
+      "tags": ["rome", "prati", "bakery", "infatuation"]
+    },
+    {
+      "name": "Forno Da Milvio",
+      "address": "Via dei Serpenti 7, Monti, Rome",
+      "city": "Rome",
+      "region": "Lazio",
+      "country": "Italy",
+      "url": "https://www.theinfatuation.com/rome/guides/best-bakeries-rome",
+      "description": "Monti bakery. Order: deep-flavor chewy breads, light airy pizza (tomato, mortadella, or winter chicory & anchovy).",
+      "tags": ["rome", "monti", "bakery", "infatuation"]
+    }
+  ]
+}

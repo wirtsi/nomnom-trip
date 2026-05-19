@@ -1,0 +1,19 @@
+[project]
+name = "nomnom"
+version = "0.1.0"
+description = "Restaurant finder — aggregate Michelin, blogs, and local guides into a searchable SQLite DB"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "folium>=0.20.0",
+]
+
+[project.scripts]
+nomnom-sync = "scripts.sync:main"
+nomnom-query = "scripts.query:main"
+nomnom-search = "scripts.search:main"
+nomnom-geocode = "scripts.geocode:main"
+
+[dependency-groups]
+dev = []
+

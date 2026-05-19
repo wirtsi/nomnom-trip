@@ -1,0 +1,83 @@
+{
+  "source_name": "Carinthia Local",
+  "source_base_url": "https://www.tripadvisor.com/Restaurants-g1164602-Kotschach_Mauthen_Carinthia_Austrian_Alps.html",
+  "entries": [
+    {
+      "name": "Delikat Genusshandwerk",
+      "address": "Kötschach 7, 9640 Kötschach-Mauthen, Austria",
+      "city": "Kötschach-Mauthen",
+      "region": "Kärnten",
+      "country": "Austria",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g1164602-d19272775-Reviews-Delikat_Genusshandwerk-Kotschach_Mauthen_Carinthia_Austrian_Alps.html",
+      "category": "restaurant",
+      "description": "Mediterranean and Austrian cuisines, tapas, nicely cooked local dishes. Small gourmet shop and restaurant in the heart of Kötschach-Mauthen.",
+      "tags": ["carinthia", "gailtal"]
+    },
+    {
+      "name": "Landgasthof Pfeffermühle",
+      "address": "Kötschach 331, 9640 Kötschach-Mauthen, Austria",
+      "city": "Kötschach-Mauthen",
+      "region": "Kärnten",
+      "country": "Austria",
+      "url": "https://www.pfeffermuehle.com/",
+      "category": "restaurant",
+      "description": "Traditional family business for over 40 years, situated between Kötschach and Mauthen. Down-to-earth, genuine Carinthian cooking in a homely, laid-back atmosphere.",
+      "tags": ["carinthia", "gailtal"]
+    },
+    {
+      "name": "Gasthof Edelweiss",
+      "address": "Kötschach-Mauthen, 9640, Austria",
+      "city": "Kötschach-Mauthen",
+      "region": "Kärnten",
+      "country": "Austria",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g1164602-d5980449-Reviews-Gasthof_Edelweiss-Kotschach_Mauthen_Carinthia_Austrian_Alps.html",
+      "category": "restaurant",
+      "description": "Real biergarten close to an old hotel with good food in a comfortable, relaxing and surprising court. Traditional Austrian inn.",
+      "tags": ["carinthia", "gailtal"]
+    },
+    {
+      "name": "Cafe-Restaurant Reiter",
+      "address": "Kötschach-Mauthen, 9640, Austria",
+      "city": "Kötschach-Mauthen",
+      "region": "Kärnten",
+      "country": "Austria",
+      "url": "https://www.tripadvisor.com/Restaurants-g1164602-Kotschach_Mauthen_Carinthia_Austrian_Alps.html",
+      "category": "restaurant",
+      "description": "Local cafe-restaurant in Kötschach-Mauthen serving Austrian classics.",
+      "tags": ["carinthia", "gailtal"]
+    },
+    {
+      "name": "Familie Eduard Engl Speck und Reid'n",
+      "address": "Kötschach-Mauthen, 9640, Austria",
+      "city": "Kötschach-Mauthen",
+      "region": "Kärnten",
+      "country": "Austria",
+      "url": "https://www.tripadvisor.com/Restaurants-g1164602-Kotschach_Mauthen_Carinthia_Austrian_Alps.html",
+      "category": "restaurant",
+      "description": "Traditional Carinthian family restaurant known for local cured meats (Speck) and specialties.",
+      "tags": ["carinthia", "gailtal"]
+    },
+    {
+      "name": "Plöckenhaus",
+      "address": "Plöckenpass 100, 9640 Kötschach-Mauthen, Austria",
+      "city": "Kötschach-Mauthen",
+      "region": "Kärnten",
+      "country": "Austria",
+      "url": "https://www.tripadvisor.com/Restaurants-g1164602-Kotschach_Mauthen_Carinthia_Austrian_Alps.html",
+      "category": "restaurant",
+      "description": "Mountain restaurant at the Plöcken Pass, hearty Carinthian fare with panoramic alpine views.",
+      "tags": ["carinthia", "gailtal"]
+    },
+    {
+      "name": "Sissys Sonnleitners Landhaus Kellerwand",
+      "address": "Kellerwandweg 1, 9640 Kötschach-Mauthen, Austria",
+      "city": "Kötschach-Mauthen",
+      "region": "Kärnten",
+      "country": "Austria",
+      "url": "https://www.tripadvisor.com/Restaurants-g1164602-Kotschach_Mauthen_Carinthia_Austrian_Alps.html",
+      "category": "restaurant",
+      "description": "Local guesthouse and restaurant serving traditional Carinthian cuisine in a rustic setting.",
+      "tags": ["carinthia", "gailtal"]
+    }
+  ]
+}
