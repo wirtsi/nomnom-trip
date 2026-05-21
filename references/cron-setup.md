@@ -1,7 +1,7 @@
 # Keeping the data in sync — three options
 
 The skill's `sync.py` is just a regular Python script. It needs to run
-somewhere with a long-running scheduler — Claude itself can't keep cron
+somewhere with a long-running scheduler — the agent itself can't keep cron
 ticking between conversations. Pick whichever of these matches where you
 actually want the database to live.
 

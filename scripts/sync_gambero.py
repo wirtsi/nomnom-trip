@@ -3,9 +3,8 @@
 Gambero Rosso is fully behind Cloudflare's JS challenge — Python urllib
 gets HTTP 403 immediately. The data has to come from a real browser
 session. The companion `scrape_gambero.js` is run inside a tab on
-gamberorosso.it (via the Claude Chrome extension) and dumps to a JSON
-file under `data/gambero_*.json`. This script reads those JSONs and
-upserts them into the DB.
+gamberorosso.it and dumps to a JSON file under `data/gambero_*.json`.
+This script reads those JSONs and upserts them into the DB.
 
 To re-scrape, the workflow is:
 1. Open a Chrome tab on https://www.gamberorosso.it/collections/gelaterie/
@@ -17,8 +16,7 @@ To re-scrape, the workflow is:
 4. Run `python3 scripts/sync_gambero.py`.
 
 Each record in the dump has: u (url), s (slug), n (name), lat, lng,
-d (description), and optionally e (error).
-"""
+d (description), and optionally e (error)."""
 
 from __future__ import annotations
 

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1a1a">
+  <title>nomnom — restaurant finder</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --bg-2: #232323;
+      --bg-3: #2d2d2d;
+      --fg: #e0e0e0;
+      --fg-dim: #9a9a9a;
+      --accent: #ff6b35;
+      --border: #3a3a3a;
+      --danger: #ff5555;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+                 font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+    header.app {
+      background: var(--bg-2); border-bottom: 1px solid var(--border);
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+    }
+    header.app h1 { margin: 0; font-size: 18px; color: var(--accent); letter-spacing: .5px; }
+    .status { color: var(--fg-dim); font-size: 13px; flex: 1; min-width: 0; }
+    .status.error { color: var(--danger); }
+    main {
+      display: grid; grid-template-columns: 380px 1fr; min-height: 0;
+    }
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto 40vh; }
+      .panel { max-height: none; }
+    }
+    .panel {
+      background: var(--bg-2); border-right: 1px solid var(--border);
+      padding: 16px; overflow-y: auto;
+    }
+    .row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .row label { font-size: 12px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: .5px; }
+    input[type="text"], input[type="search"], select {
+      background: var(--bg-3); color: var(--fg); border: 1px solid var(--border);
+      padding: 12px; border-radius: 8px; font-size: 15px; min-height: 44px;
+    }
+    input[type="text"]:focus, input[type="search"]:focus, select:focus {
+      outline: none; border-color: var(--accent);
+    }
+    input[type="range"] { width: 100%; accent-color: var(--accent); min-height: 44px; }
+    .sources { display: flex; flex-wrap: wrap; gap: 6px; }
+    .src-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg-3); border: 1px solid var(--border);
+      padding: 8px 12px; border-radius: 20px; min-height: 44px;
+      cursor: pointer; font-size: 14px;
+    }
+    .src-toggle input { accent-color: var(--accent); }
+    .buttons { display: flex; gap: 8px; }
+    button {
+      flex: 1; background: var(--accent); color: #1a1a1a; border: none;
+      padding: 12px; border-radius: 8px; font-weight: 600; font-size: 15px;
+      cursor: pointer; min-height: 44px;
+    }
+    button.secondary { background: var(--bg-3); color: var(--fg); border: 1px solid var(--border); }
+    button:hover { filter: brightness(1.1); }
+    #results { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .empty { color: var(--fg-dim); text-align: center; padding: 24px; }
+    .card {
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; cursor: pointer;
+      transition: border-color .1s ease;
+    }
+    .card:hover { border-color: var(--accent); }
+    .card header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .card h3 { margin: 0 0 4px; font-size: 16px; }
+    .card .cuisine { color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+    .card .addr { color: var(--fg-dim); font-size: 13px; margin-bottom: 4px; }
+    .card .meta { font-size: 12px; color: var(--fg-dim); }
+    .card .endorse { margin-top: 6px; font-size: 12px; color: var(--fg-dim); }
+    .card .desc { margin: 8px 0 4px; font-size: 13px; color: #c0c0c0; }
+    .card .source-link {
+      display: inline-block; margin-top: 8px; color: var(--accent);
+      text-decoration: none; font-size: 13px; padding: 6px 0; min-height: 30px;
+    }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+      background: var(--bg); border: 1px solid var(--border); color: var(--fg);
+    }
+    .badge-michelin { background: #b71c1c; border-color: #b71c1c; color: #fff; }
+    .badge-splendido { background: #1565c0; border-color: #1565c0; color: #fff; }
+    .badge-raisin { background: #6a1b9a; border-color: #6a1b9a; color: #fff; }
+    .badge-gambero { background: #ef6c00; border-color: #ef6c00; color: #fff; }
+    #map { width: 100%; height: 100%; background: #111; }
+    /* Leaflet popup theming */
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: var(--bg-3); color: var(--fg);
+    }
+    .leaflet-popup-content a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header class="app">
+    <h1>nomnom</h1>
+    <div id="status" class="status">Initializing…</div>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="row">
+        <label for="q">Where</label>
+        <input type="search" id="q" placeholder="Bologna, Italy" autocomplete="off">
+      </div>
+      <div class="buttons">
+        <button id="search">Search</button>
+        <button id="geo" class="secondary">Use my location</button>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <label for="radius">Radius <span id="radius-label">10 km</span></label>
+        <input type="range" id="radius" min="0.5" max="50" step="0.5" value="10">
+      </div>
+      <div class="row">
+        <label for="category">Category</label>
+        <select id="category">
+          <option value="">(any)</option>
+          <option value="restaurant">restaurant</option>
+          <option value="bar">bar</option>
+          <option value="wine_shop">wine_shop</option>
+          <option value="shop">shop</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Sources</label>
+        <div id="sources" class="sources"></div>
+      </div>
+      <div class="row">
+        <label for="cuisine">Cuisine contains</label>
+        <input type="text" id="cuisine" placeholder="e.g. Italian">
+      </div>
+      <div class="row">
+        <label for="keyword">Keyword</label>
+        <input type="text" id="keyword" placeholder="e.g. natural wine">
+      </div>
+      <div class="row">
+        <label for="limit">Max results</label>
+        <input type="number" id="limit" value="200" min="10" max="1000" step="10">
+      </div>
+      <div id="results"></div>
+    </section>
+    <section><div id="map"></div></section>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./sqlite3.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

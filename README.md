@@ -38,11 +38,23 @@ uv run python scripts/query.py --near "Rome, Italy" --radius-km 3
 
 Recommended cadence: **weekly, Sunday 03:00**.
 
+## PWA
+
+An offline-capable Progressive Web App lives in [`pwa/`](./pwa/). It ships
+the DB to the browser via sql.js (WASM) and mirrors `db.py:search_near()`,
+so results match the CLI. Build the slim DB and serve from the repo root:
+
+```bash
+uv run python scripts/export_pwa_db.py
+python3 -m http.server 8080
+# open http://localhost:8080/pwa/
+```
+
 ## Layout
 
 ```
 restaurant-finder/
-├── SKILL.md                       # Trigger & usage instructions for Claude
+├── SKILL.md                       # Trigger & usage instructions
 ├── README.md                      # This file
 ├── scripts/
 │   ├── db.py                      # SQLite schema + helpers
