@@ -115,6 +115,20 @@ def main() -> int:
         f"Shrunk: {src_size / 1024 / 1024:.2f} MB → {dst_size / 1024 / 1024:.2f} MB "
         f"({100 * (1 - dst_size / src_size):.1f}% smaller)"
     )
+
+    # Inject a cache-busting timestamp into the PWA so users never get a stale DB
+    timestamp = str(int(__import__("time").time()))
+    app_js = ROOT / "pwa" / "app.js"
+    if app_js.exists():
+        content = app_js.read_text()
+        content = __import__("re").sub(
+            r'restaurants\.pwa\.db\?t=\d+',
+            f"restaurants.pwa.db?t={timestamp}",
+            content,
+        )
+        app_js.write_text(content)
+        print(f"Bumped DB_URL cache-buster to t={timestamp}")
+
     return 0
 
 
