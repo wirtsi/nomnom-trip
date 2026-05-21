@@ -1,7 +1,7 @@
 // nomnom PWA — vanilla JS app driving sql.js + Leaflet.
 // Mirrors scripts/db.py:search_near() so results match the CLI byte-for-byte.
 
-const DB_URL = `../data/restaurants.pwa.db?t=1779365560`; // set by export_pwa_db.py
+const DB_URL = `../data/restaurants.pwa.db?t=1779365722`; // set by export_pwa_db.py
 const SOURCES = ["michelin", "splendido", "raisin", "gambero"];
 
 const els = {
@@ -138,7 +138,8 @@ function searchNear({
 
 // ---- UI -----------------------------------------------------------------
 function setStatus(msg, isError = false) {
-  els.status.textContent = msg;
+  const spinner = db ? '' : '<span class="spinner"></span>';
+  els.status.innerHTML = spinner + msg;
   els.status.classList.toggle("error", isError);
 }
 
@@ -307,6 +308,8 @@ function useMyLocation() {
 // ---- bootstrap ----------------------------------------------------------
 async function loadDb() {
   setStatus("Loading database…");
+  els.search.disabled = true;
+  els.geo.disabled = true;
   const SQL = await initSqlJs({ locateFile: () => "./sqlite3.wasm" });
   const resp = await fetch(DB_URL);
   if (!resp.ok) throw new Error(`DB fetch failed: ${resp.status}`);
@@ -314,6 +317,8 @@ async function loadDb() {
   db = new SQL.Database(buf);
   const count = db.exec("SELECT COUNT(*) FROM places")[0].values[0][0];
   setStatus(`Ready — ${count.toLocaleString()} places indexed.`);
+  els.search.disabled = false;
+  els.geo.disabled = false;
 }
 
 function initMap() {
