@@ -11,7 +11,14 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE).then(async (c) => {
+      for (const url of ASSETS) {
+        const res = await fetch(url, { cache: "reload" });
+        if (res.ok) c.put(url, res);
+      }
+    })
+  );
   self.skipWaiting();
 });
 
