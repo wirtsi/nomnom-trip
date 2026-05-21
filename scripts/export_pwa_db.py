@@ -118,7 +118,7 @@ def main() -> int:
 
     # Inject a cache-busting timestamp into the PWA so users never get a stale DB
     timestamp = str(int(__import__("time").time()))
-    app_js = ROOT / "pwa" / "app.js"
+    app_js = ROOT / "app.js"
     if app_js.exists():
         content = app_js.read_text()
         content = __import__("re").sub(

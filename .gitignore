@@ -14,6 +14,7 @@ wheels/
 
 # Runtime / generated data (created by sync scripts)
 data/restaurants.db
+data/restaurants.db-journal
 data/geocode_cache.sqlite
 data/raisin_sync.log
 data/*.json

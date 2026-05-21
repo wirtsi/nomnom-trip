@@ -40,20 +40,26 @@ Recommended cadence: **weekly, Sunday 03:00**.
 
 ## PWA
 
-An offline-capable Progressive Web App lives in [`pwa/`](./pwa/). It ships
-the DB to the browser via sql.js (WASM) and mirrors `db.py:search_near()`,
-so results match the CLI. Build the slim DB and serve from the repo root:
+An offline-capable Progressive Web App ships the DB to the browser via sql.js
+(WASM) and mirrors `db.py:search_near()`, so results match the CLI. Build the
+slim DB and serve from the repo root:
 
 ```bash
 uv run python scripts/export_pwa_db.py
 python3 -m http.server 8080
-# open http://localhost:8080/pwa/
+# open http://localhost:8080/
 ```
 
 ## Layout
 
 ```
 restaurant-finder/
+├── index.html                     # PWA shell (served on GitHub Pages)
+├── app.js                         # PWA logic (sql.js + Leaflet)
+├── sw.js                          # Service Worker for offline shell
+├── manifest.json                  # Installable app manifest
+├── icon.svg                       # App icon
+├── sqlite3.js / sqlite3.wasm      # sql.js WASM distribution
 ├── SKILL.md                       # Trigger & usage instructions
 ├── README.md                      # This file
 ├── scripts/
@@ -67,19 +73,11 @@ restaurant-finder/
 ├── references/
 │   ├── sources.md                 # Per-source quirks and recovery notes
 │   └── cron-setup.md              # Three scheduler setups
-├── data/
-│   ├── restaurants.db             # The aggregated DB (created by sync)
-│   └── geocode_cache.sqlite       # Geocoding cache
-└── examples/
-    └── README.md                  # Sample queries and expected output
+└── data/
+    ├── restaurants.db             # The aggregated DB (created by sync)
+    ├── restaurants.pwa.db         # Slim WASM-shippable DB (created by export)
+    └── geocode_cache.sqlite       # Geocoding cache
 ```
-
-## Adding more sources
-
-The bar is low: any function that yields dicts with the fields in
-`db.upsert_place` and writes through `db.connect()`. See
-`references/sources.md` for candidates and the pattern.
-
 ## Dependencies
 
 Pure Python 3.10+ standard library — no `pip install` needed. (The choice
