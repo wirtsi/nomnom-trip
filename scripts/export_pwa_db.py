@@ -129,6 +129,18 @@ def main() -> int:
         app_js.write_text(content)
         print(f"Bumped DB_URL cache-buster to t={timestamp}")
 
+    # Bump SW cache name so shell assets are re-fetched on next load
+    sw_js = ROOT / "sw.js"
+    if sw_js.exists():
+        content = sw_js.read_text()
+        content = __import__("re").sub(
+            r'const CACHE = "nomnom-[^"]+"',
+            f'const CACHE = "nomnom-{timestamp}"',
+            content,
+        )
+        sw_js.write_text(content)
+        print(f"Bumped SW cache name to nomnom-{timestamp}")
+
     return 0
 
 

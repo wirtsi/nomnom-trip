@@ -1,4 +1,5 @@
-const CACHE = "nomnom-v1";
+// Bumped by export_pwa_db.py alongside the DB cache-buster.
+const CACHE = "nomnom-v2";
 const ASSETS = [
   "./",
   "./index.html",
