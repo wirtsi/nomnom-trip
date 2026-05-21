@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#1a1a1a">
   <title>nomnom — restaurant finder</title>
   <link rel="manifest" href="./manifest.json">
@@ -23,7 +25,11 @@
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
-                 font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+                 font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                 -webkit-user-select: none; user-select: none;
+                 -webkit-touch-callout: none;
+                 /* overscroll-behavior only in standalone — see @media rule below */
+                 touch-action: manipulation; }
     body { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
     header.app {
       background: var(--bg-2); border-bottom: 1px solid var(--border);
@@ -107,6 +113,10 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Disable overscroll + pull-to-refresh only in installed PWA mode */
+    @media (display-mode: standalone) {
+      html, body { overscroll-behavior-y: none; }
+    }
     /* Leaflet popup theming */
     .leaflet-popup-content-wrapper, .leaflet-popup-tip {
       background: var(--bg-3); color: var(--fg);
