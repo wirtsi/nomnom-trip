@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine"]
+SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine", "identitagolose"]
 
 
 def run_one(name: str, **kwargs) -> tuple[str, int, int, str]:

@@ -1,8 +1,8 @@
 // nomnom PWA — vanilla JS app driving sql.js + Leaflet.
 // Mirrors scripts/db.py:search_near() so results match the CLI byte-for-byte.
 
-const DB_URL = `./data/restaurants.pwa.db?t=1779372247`; // set by export_pwa_db.py
-const SOURCES = ["michelin", "splendido", "raisin", "gambero", "rawwine"];
+const DB_URL = `./data/restaurants.pwa.db?t=1779451007`; // set by export_pwa_db.py
+const SOURCES = ["michelin", "splendido", "raisin", "gambero", "rawwine", "identitagolose"];
 
 const els = {
   q: document.getElementById("q"),
