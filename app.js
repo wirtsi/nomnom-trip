@@ -327,7 +327,7 @@ function initMap() {
     attribution: "© OpenStreetMap",
     maxZoom: 19,
   }).addTo(map);
-  markerLayer = L.layerGroup().addTo(map);
+  markerLayer = L.featureGroup().addTo(map);
 }
 
 function wireEvents() {
