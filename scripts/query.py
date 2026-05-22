@@ -139,7 +139,7 @@ def main() -> int:
     ap.add_argument("--lng", type=float)
     ap.add_argument("--radius-km", type=float, default=10.0)
     ap.add_argument("--category", choices=["restaurant", "bar", "wine_shop", "shop"])
-    ap.add_argument("--sources", help="Comma-separated: splendido,raisin,michelin")
+    ap.add_argument("--sources", help="Comma-separated: splendido,raisin,michelin,gambero,blog,rawwine")
     ap.add_argument("--cuisine", help="Substring match on cuisine field")
     ap.add_argument("--keyword", help="Free-text search across name/description/tags")
     ap.add_argument("--limit", type=int, default=20)

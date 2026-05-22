@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog"]
+SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine"]
 
 
 def run_one(name: str, **kwargs) -> tuple[str, int, int, str]:
@@ -33,6 +33,8 @@ def run_one(name: str, **kwargs) -> tuple[str, int, int, str]:
                 max_pages=kwargs.get("max_pages", 1000),
                 country=kwargs.get("country"),
             )
+        elif name == "rawwine":
+            added, updated = mod.sync(max_pages=kwargs.get("max_pages", 500))
         else:
             added, updated = mod.sync()
         elapsed = time.time() - started
@@ -57,11 +59,12 @@ def main() -> int:
     sources = [args.source] if args.source else SOURCES
     failures: list[str] = []
     for s in sources:
-        kwargs = (
-            {"max_pages": args.max_pages, "country": args.country}
-            if s == "raisin"
-            else {}
-        )
+        if s == "raisin":
+            kwargs = {"max_pages": args.max_pages, "country": args.country}
+        elif s == "rawwine":
+            kwargs = {"max_pages": args.max_pages}
+        else:
+            kwargs = {}
         _, _, _, err = run_one(s, **kwargs)
         if err:
             failures.append(f"{s}: {err}")

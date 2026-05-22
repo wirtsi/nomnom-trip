@@ -15,7 +15,7 @@ DB_PATH = Path(__file__).parent.parent / "data" / "restaurants.db"
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS places (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    source       TEXT NOT NULL,        -- 'splendido' | 'raisin' | 'michelin'
+    source       TEXT NOT NULL,        -- 'splendido' | 'raisin' | 'michelin' | 'gambero' | 'blog' | 'rawwine'
     source_id    TEXT NOT NULL,        -- ID in source's namespace
     source_url   TEXT NOT NULL,
     name         TEXT NOT NULL,
