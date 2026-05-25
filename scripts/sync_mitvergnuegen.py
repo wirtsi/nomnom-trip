@@ -135,7 +135,7 @@ def tip_to_place(tip_data: dict, city_config: dict) -> Optional[dict]:
     name = name.replace("&amp;", "&")
     address_full = place.get("address", "")
     street, postal, city, region = parse_address(address_full, city_config)
-    loc = place.get("location", {})
+    loc = place.get("location") or {}
     lat = loc.get("lat")
     lng = loc.get("lng")
     try:
@@ -243,6 +243,8 @@ def ingest_mitvergnuegen(*, city: str = "all", max_posts: int = 0, max_tips: int
             processed += 1
             if processed % 10 == 0:
                 print(f"  [{processed}/{len(tip_ids)}] added={total_added} updated={total_updated}")
+            if processed % 50 == 0:
+                conn.commit()
             time.sleep(RE_DELAY)
     conn.commit()
     conn.close()
