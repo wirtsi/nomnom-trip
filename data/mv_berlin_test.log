@@ -1,0 +1,45 @@
+
+=== BERLIN: mitvergnuegen.com ===
+  Category IDs: [27015, 27017, 13753]
+  Page 1: +100 posts (total 100)
+  Total posts to process: 100
+  [5/100] 0 tips from post (total unique: 44)
+  [10/100] 0 tips from post (total unique: 76)
+  [15/100] 11 tips from post (total unique: 150)
+  [20/100] 11 tips from post (total unique: 191)
+  [25/100] 11 tips from post (total unique: 229)
+  [30/100] 11 tips from post (total unique: 270)
+  [35/100] 11 tips from post (total unique: 306)
+  [40/100] 11 tips from post (total unique: 342)
+  [45/100] 11 tips from post (total unique: 377)
+  [50/100] 0 tips from post (total unique: 387)
+  [55/100] 0 tips from post (total unique: 410)
+  [60/100] 10 tips from post (total unique: 429)
+  [65/100] 21 tips from post (total unique: 456)
+  [70/100] 11 tips from post (total unique: 491)
+  [75/100] 0 tips from post (total unique: 519)
+  [80/100] 11 tips from post (total unique: 546)
+  [85/100] 1 tips from post (total unique: 578)
+  [90/100] 11 tips from post (total unique: 595)
+  [95/100] 0 tips from post (total unique: 611)
+  [100/100] 1 tips from post (total unique: 626)
+  Total unique tips: 626
+  [ERROR] https://mitvergnuegen.com/api/v1/tips/98984/: HTTP Error 404: Not Found
+  [ERROR] https://mitvergnuegen.com/api/v1/tips/99136/: HTTP Error 404: Not Found
+  [ERROR] https://mitvergnuegen.com/api/v1/tips/99140/: HTTP Error 404: Not Found
+  [10/626] added=10 updated=0
+  [20/626] added=20 updated=0
+  [30/626] added=29 updated=1
+  [40/626] added=38 updated=2
+  [50/626] added=48 updated=2
+  [60/626] added=58 updated=2
+  [70/626] added=67 updated=3
+FAILED: 'bool' object has no attribute 'get'
+Traceback (most recent call last):
+  File "/Users/fkrause/workspace/nomnom/scripts/sync_mitvergnuegen.py", line 260, in main
+    ingest_mitvergnuegen(
+  File "/Users/fkrause/workspace/nomnom/scripts/sync_mitvergnuegen.py", line 235, in ingest_mitvergnuegen
+    place = tip_to_place(data, city_cfg)
+  File "/Users/fkrause/workspace/nomnom/scripts/sync_mitvergnuegen.py", line 139, in tip_to_place
+    lat = loc.get("lat")
+AttributeError: 'bool' object has no attribute 'get'

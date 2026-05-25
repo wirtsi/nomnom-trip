@@ -39,22 +39,22 @@ RE_DELAY = 0.5
 CITIES = {
     "berlin": {
         "domain": "mitvergnuegen.com",
-        "postal_re": r"(\d{5})\s+(Berlin|Brandenburg)",
+        "fallback_city": "Berlin",
         "country": "Germany",
     },
     "hamburg": {
         "domain": "hamburg.mitvergnuegen.com",
-        "postal_re": r"(\d{5})\s+Hamburg",
+        "fallback_city": "Hamburg",
         "country": "Germany",
     },
     "muenchen": {
         "domain": "muenchen.mitvergnuegen.com",
-        "postal_re": r"(\d{5})\s+(München|Munchen?)",
+        "fallback_city": "München",
         "country": "Germany",
     },
     "koeln": {
         "domain": "koeln.mitvergnuegen.com",
-        "postal_re": r"(\d{5})\s+(Köln|Koeln)",
+        "fallback_city": "Köln",
         "country": "Germany",
     },
 }
@@ -107,15 +107,15 @@ def fetch_tip_detail(domain: str, tip_id: int) -> Optional[dict]:
         return data.get("tip")
     return None
 
-
-def parse_address(address_str: str, city_re: str) -> tuple[str, str, str, str]:
+def parse_address(address_str: str, city_config: dict) -> tuple[str, str, str, str]:
+    """Parse street, postal, city, region from Mitvergnügen address string."""
     if not address_str:
         return "", "", "", ""
     address_str = address_str.strip()
     postal_match = re.search(r"(\d{5})\s+", address_str)
     postal = postal_match.group(1) if postal_match else ""
-    city_match = re.search(city_re, address_str, re.IGNORECASE)
-    city = city_match.group(1).strip() if city_match else ""
+    city_match = re.search(r"\d{5}\s+([\w\s\-äöüÄÖÜ]+?)(?:\s*$|\s+\d)", address_str)
+    city = city_match.group(1).strip() if city_match else city_config.get("fallback_city", "")
     street = address_str
     if postal_match:
         street = address_str[:postal_match.start()].strip().rstrip(",")
