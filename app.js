@@ -152,6 +152,12 @@ function renderSourceCheckboxes() {
     label.innerHTML = `<input type="checkbox" id="${id}" value="${s}" checked> ${s}`;
     els.sources.appendChild(label);
   }
+  // Auto-reload when any source checkbox toggles
+  for (const cb of els.sources.querySelectorAll('input[type="checkbox"]')) {
+    cb.addEventListener("change", () => {
+      setTimeout(() => runSearch(null), 50);
+    });
+  }
 }
 
 function getSelectedSources() {
@@ -334,11 +340,29 @@ function wireEvents() {
   els.radius.addEventListener("input", () => {
     els.radiusLabel.textContent = `${els.radius.value} km`;
   });
+  els.radius.addEventListener("change", () => runSearch(null));
   els.radiusLabel.textContent = `${els.radius.value} km`;
   els.search.addEventListener("click", () => runSearch(null));
   els.q.addEventListener("keydown", (e) => {
     if (e.key === "Enter") runSearch(null);
   });
+  // Auto-reload on any filter change
+  let searchTimeout = null;
+  function autoSearch() {
+    if (searchTimeout) return;
+    searchTimeout = setTimeout(() => {
+      searchTimeout = null;
+      runSearch(null);
+    }, 250);
+  }
+  els.category.addEventListener("change", autoSearch);
+  els.cuisine.addEventListener("change", autoSearch);
+  els.keyword.addEventListener("change", autoSearch);
+  els.limit.addEventListener("change", autoSearch);
+  const limitCheckbox = document.getElementById("limit-checkbox");
+  if (limitCheckbox) {
+    limitCheckbox.addEventListener("change", autoSearch);
+  }
   els.geo.addEventListener("click", useMyLocation);
 }
 
