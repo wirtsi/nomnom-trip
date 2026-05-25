@@ -1,5 +1,5 @@
 // Bumped by export_pwa_db.py alongside the DB cache-buster.
-const CACHE = "nomnom-1779451007";
+const CACHE = "nomnom-1779704598";
 const ASSETS = [
   "./",
   "./index.html",
