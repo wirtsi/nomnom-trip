@@ -134,7 +134,7 @@ def tip_to_place(tip_data: dict, city_config: dict) -> Optional[dict]:
         return None
     name = name.replace("&amp;", "&")
     address_full = place.get("address", "")
-    street, postal, city, region = parse_address(address_full, city_config["postal_re"])
+    street, postal, city, region = parse_address(address_full, city_config)
     loc = place.get("location", {})
     lat = loc.get("lat")
     lng = loc.get("lng")
