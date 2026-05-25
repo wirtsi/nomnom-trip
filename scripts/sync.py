@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine", "identitagolose", "gaultmillau_at", "gaultmillau_ch", "wirtshauskultur", "schlemmeratlas"]
+SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine", "identitagolose", "gaultmillau", "wirtshauskultur", "schlemmeratlas"]
 
 
 def run_one(name: str, **kwargs) -> tuple[str, int, int, str]:
@@ -35,7 +35,7 @@ def run_one(name: str, **kwargs) -> tuple[str, int, int, str]:
             )
         elif name == "rawwine":
             added, updated = mod.sync(max_pages=kwargs.get("max_pages", 500))
-        elif name in ("gaultmillau_at", "gaultmillau_ch", "wirtshauskultur", "schlemmeratlas"):
+        elif name in ("gaultmillau", "wirtshauskultur", "schlemmeratlas"):
             added, updated = mod.sync(max_urls=kwargs.get("max_urls"))
         else:
             added, updated = mod.sync()

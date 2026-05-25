@@ -38,8 +38,8 @@ NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "restaurants.db"
 REQUEST_DELAY = 0.5
 
-SOURCE_NAME = "gaultmillau_ch"
-DEDUP_TAG = "gaultmillau-ch"
+SOURCE_NAME = "gaultmillau"
+DEDUP_TAG = "gaultmillau"
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; NomnomBot/1.0)"}
 

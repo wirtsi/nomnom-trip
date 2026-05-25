@@ -37,8 +37,8 @@ DB_PATH = Path(__file__).resolve().parent.parent / "data" / "restaurants.db"
 REQUEST_DELAY = 0.4  # seconds between requests
 NAMESPACES = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
-SOURCE_NAME = "gaultmillau_at"
-DEDUP_TAG = "gaultmillau-at"
+SOURCE_NAME = "gaultmillau"
+DEDUP_TAG = "gaultmillau"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; NomnomBot/1.0)"

@@ -2,7 +2,7 @@
 // Mirrors scripts/db.py:search_near() so results match the CLI byte-for-byte.
 
 const DB_URL = `./data/restaurants.pwa.db?t=1779451007`; // set by export_pwa_db.py
-const SOURCES = ["michelin", "splendido", "raisin", "gambero", "rawwine", "identitagolose"];
+const SOURCES = ["michelin", "splendido", "raisin", "gambero", "rawwine", "identitagolose", "gaultmillau", "wirtshauskultur", "schlemmeratlas"];
 
 const els = {
   q: document.getElementById("q"),
