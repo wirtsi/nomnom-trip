@@ -155,7 +155,7 @@ function renderSourceCheckboxes() {
   // Auto-reload when any source checkbox toggles
   for (const cb of els.sources.querySelectorAll('input[type="checkbox"]')) {
     cb.addEventListener("change", () => {
-      setTimeout(() => runSearch(null), 50);
+      setTimeout(() => runSearch(lastCenter), 50);
     });
   }
 }
@@ -352,7 +352,7 @@ function wireEvents() {
     if (searchTimeout) return;
     searchTimeout = setTimeout(() => {
       searchTimeout = null;
-      runSearch(null);
+      runSearch(lastCenter);
     }, 250);
   }
   els.category.addEventListener("change", autoSearch);
