@@ -340,7 +340,7 @@ function wireEvents() {
   els.radius.addEventListener("input", () => {
     els.radiusLabel.textContent = `${els.radius.value} km`;
   });
-  els.radius.addEventListener("change", () => runSearch(null));
+  els.radius.addEventListener("change", () => runSearch(lastCenter));
   els.radiusLabel.textContent = `${els.radius.value} km`;
   els.search.addEventListener("click", () => runSearch(null));
   els.q.addEventListener("keydown", (e) => {
