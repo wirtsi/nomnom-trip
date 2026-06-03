@@ -84,8 +84,9 @@ function searchNear({
     params.push(...sources);
   }
   if (cuisine) {
-    sql += " AND cuisine LIKE ?";
-    params.push(`%${cuisine}%`);
+    sql += " AND (cuisine LIKE ? OR description LIKE ? OR tags LIKE ?)";
+    const kw = `%${cuisine}%`;
+    params.push(kw, kw, kw);
   }
   if (keyword) {
     sql += " AND (name LIKE ? OR description LIKE ? OR tags LIKE ?)";
