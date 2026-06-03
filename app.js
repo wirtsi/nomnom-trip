@@ -9,8 +9,7 @@ const els = {
   radius: document.getElementById("radius"),
   radiusLabel: document.getElementById("radius-label"),
   category: document.getElementById("category"),
-  cuisine: document.getElementById("cuisine"),
-  keyword: document.getElementById("keyword"),
+  searchText: document.getElementById("searchText"),
   limit: document.getElementById("limit"),
   sources: document.getElementById("sources"),
   search: document.getElementById("search"),
@@ -62,8 +61,7 @@ function searchNear({
   radiusKm = 10,
   category = null,
   sources = null,
-  cuisine = null,
-  keyword = null,
+  searchText = null,
   limit = 20,
 }) {
   const dlat = radiusKm / 111.0;
@@ -83,15 +81,10 @@ function searchNear({
     sql += ` AND source IN (${sources.map(() => "?").join(",")})`;
     params.push(...sources);
   }
-  if (cuisine) {
-    sql += " AND (cuisine LIKE ? OR description LIKE ? OR tags LIKE ?)";
-    const kw = `%${cuisine}%`;
-    params.push(kw, kw, kw);
-  }
-  if (keyword) {
-    sql += " AND (name LIKE ? OR description LIKE ? OR tags LIKE ?)";
-    const kw = `%${keyword}%`;
-    params.push(kw, kw, kw);
+  if (searchText) {
+    sql += " AND (name LIKE ? OR cuisine LIKE ? OR description LIKE ? OR tags LIKE ?)";
+    const kw = `%${searchText}%`;
+    params.push(kw, kw, kw, kw);
   }
 
   const stmt = db.prepare(sql);
@@ -284,8 +277,7 @@ async function runSearch(center) {
     radiusKm: parseFloat(els.radius.value),
     category: els.category.value || null,
     sources: getSelectedSources(),
-    cuisine: els.cuisine.value.trim() || null,
-    keyword: els.keyword.value.trim() || null,
+    searchText: els.searchText.value.trim() || null,
     limit: Math.min(Math.max(parseInt(els.limit.value, 10) || 200, 10), 1000),
   });
 
@@ -357,8 +349,7 @@ function wireEvents() {
     }, 250);
   }
   els.category.addEventListener("change", autoSearch);
-  els.cuisine.addEventListener("change", autoSearch);
-  els.keyword.addEventListener("change", autoSearch);
+  els.searchText.addEventListener("input", autoSearch);
   els.limit.addEventListener("change", autoSearch);
   const limitCheckbox = document.getElementById("limit-checkbox");
   if (limitCheckbox) {
