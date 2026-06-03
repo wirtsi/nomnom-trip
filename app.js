@@ -299,12 +299,29 @@ function useMyLocation() {
   }
   setStatus("Getting your location…");
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      runSearch({
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        display_name: "your location",
-      });
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      let display_name = "your location";
+      // Reverse geocode via Nominatim to get city name
+      try {
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+        const resp = await fetch(url, { headers: { Accept: "application/json" } });
+        if (resp.ok) {
+          const data = await resp.json();
+          // Prefer city, town, village — fall back to display name
+          display_name =
+            data.address?.city ||
+            data.address?.town ||
+            data.address?.village ||
+            data.display_name ||
+            `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          els.q.value = display_name;
+        }
+      } catch (_) {
+        // silent fallback — keep "your location"
+      }
+      runSearch({ lat, lng, display_name });
     },
     (err) => setStatus(`Location error: ${err.message}`, true),
     { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
