@@ -74,8 +74,15 @@ function searchNear({
   const params = [lat - dlat, lat + dlat, lng - dlng, lng + dlng];
 
   if (category) {
-    sql += " AND category = ?";
+    sql += " AND (LOWER(category) = LOWER(?)";
     params.push(category);
+    // Mitvergnuegen stores activity tags in cuisine field, not category
+    if (category === 'restaurant') {
+      sql += " OR (source = 'mitvergnuegen' AND cuisine LIKE '%Essen%')";
+    } else if (category === 'bar') {
+      sql += " OR (source = 'mitvergnuegen' AND cuisine LIKE '%Trinken%' AND cuisine NOT LIKE '%Essen%')";
+    }
+    sql += ")";
   }
   if (sources && sources.length) {
     sql += ` AND source IN (${sources.map(() => "?").join(",")})`;
