@@ -134,7 +134,7 @@ def parse_restaurant(url: str, html: str) -> dict | None:
         "source_id": source_id,
         "source_url": url,
         "name": name,
-        "category": "Restaurant",
+        "category": "restaurant",
         "country": "Switzerland",  # GM CH covers Switzerland
         "description": description,
     }

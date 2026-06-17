@@ -1,5 +1,5 @@
 // Bumped by export_pwa_db.py alongside the DB cache-buster.
-const CACHE = "nomnom-1779880001";
+const CACHE = "nomnom-1781713982";
 const ASSETS = [
   "./",
   "./index.html",
@@ -15,7 +15,8 @@ self.addEventListener("install", (event) => {
     caches.open(CACHE).then(async (c) => {
       for (const url of ASSETS) {
         const res = await fetch(url, { cache: "reload" });
-        if (res.ok) c.put(url, res);
+        if (!res.ok) throw new Error(`SW install failed: ${url} returned ${res.status}`);
+        c.put(url, res);
       }
     })
   );

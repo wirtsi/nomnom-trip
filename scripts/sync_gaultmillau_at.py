@@ -121,7 +121,7 @@ def parse_restaurant_detail(url: str) -> dict | None:
         "source_id": source_id,
         "source_url": url,
         "name": name,
-        "category": "Restaurant",
+        "category": "restaurant",
         "address": address.get("streetAddress", "").strip(),
         "city": address.get("addressLocality", "").strip(),
         "region": address.get("addressRegion", "").strip(),

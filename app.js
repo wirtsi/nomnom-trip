@@ -1,8 +1,8 @@
 // nomnom PWA — vanilla JS app driving sql.js + Leaflet.
 // Mirrors scripts/db.py:search_near() so results match the CLI byte-for-byte.
 
-const DB_URL = `./data/restaurants.pwa.db?t=1779800226`; // set by export_pwa_db.py
-const SOURCES = ["michelin", "splendido", "raisin", "gambero", "rawwine", "identitagolose", "gaultmillau", "wirtshauskultur", "mitvergnuegen"];
+const DB_URL = `./data/restaurants.pwa.db?t=1781713982`; // set by export_pwa_db.py
+const SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine", "identitagolose", "gaultmillau", "wirtshauskultur", "mitvergnuegen"];
 
 const els = {
   q: document.getElementById("q"),
@@ -74,7 +74,7 @@ function searchNear({
   const params = [lat - dlat, lat + dlat, lng - dlng, lng + dlng];
 
   if (category) {
-    sql += " AND (LOWER(category) = LOWER(?)";
+    sql += " AND (category = ?";
     params.push(category);
     // Mitvergnuegen stores activity tags in cuisine field, not category
     if (category === 'restaurant') {
@@ -140,7 +140,8 @@ function searchNear({
 // ---- UI -----------------------------------------------------------------
 function setStatus(msg, isError = false) {
   const spinner = db ? '' : '<span class="spinner"></span>';
-  els.status.innerHTML = spinner + msg;
+  // spinner is trusted HTML; msg may contain user input — escape it.
+  els.status.innerHTML = spinner + escapeHtml(msg);
   els.status.classList.toggle("error", isError);
 }
 

@@ -135,7 +135,7 @@ def parse_restaurant(url: str, html: str) -> dict | None:
         "source_id": source_id,
         "source_url": url,
         "name": name,
-        "category": "Restaurant",
+        "category": "restaurant",
         "address": address.get("streetAddress", "").strip() if isinstance(address, dict) else "",
         "city": address.get("addressLocality", "").strip() if isinstance(address, dict) else "",
         "region": "Niederösterreich",

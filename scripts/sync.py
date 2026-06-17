@@ -25,20 +25,26 @@ SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine", "ide
 
 def run_one(name: str, **kwargs) -> tuple[str, int, int, str]:
     """Returns (source, added, updated, error_message). Empty error on success."""
-    mod = importlib.import_module(f"sync_{name}")
     started = time.time()
     try:
-        if name == "raisin":
-            added, updated = mod.sync(
-                max_pages=kwargs.get("max_pages", 1000),
-                country=kwargs.get("country"),
-            )
-        elif name == "rawwine":
-            added, updated = mod.sync(max_pages=kwargs.get("max_pages", 500))
-        elif name in ("gaultmillau", "wirtshauskultur", "mitvergnuegen"):
-            added, updated = mod.sync(max_urls=kwargs.get("max_urls"))
+        if name == "gaultmillau":
+            # gaultmillau is split into two modules — run both and aggregate
+            added_at, updated_at = importlib.import_module("sync_gaultmillau_at").sync(max_urls=kwargs.get("max_urls"))
+            added_ch, updated_ch = importlib.import_module("sync_gaultmillau_ch").sync(max_urls=kwargs.get("max_urls"))
+            added, updated = added_at + added_ch, updated_at + updated_ch
         else:
-            added, updated = mod.sync()
+            mod = importlib.import_module(f"sync_{name}")
+            if name == "raisin":
+                added, updated = mod.sync(
+                    max_pages=kwargs.get("max_pages", 1000),
+                    country=kwargs.get("country"),
+                )
+            elif name == "rawwine":
+                added, updated = mod.sync(max_pages=kwargs.get("max_pages", 500))
+            elif name in ("wirtshauskultur", "mitvergnuegen"):
+                added, updated = mod.sync(max_urls=kwargs.get("max_urls"))
+            else:
+                added, updated = mod.sync()
         elapsed = time.time() - started
         print(f"[{name}] +{added} new, {updated} updated, {elapsed:.1f}s")
         return name, added, updated, ""
