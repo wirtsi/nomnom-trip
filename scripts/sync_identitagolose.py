@@ -33,6 +33,7 @@ from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).parent))
 import db  # noqa: E402
+import dedup  # noqa: E402
 
 BASE = "https://www.identitagolose.it"
 GUIDE_SITEMAP = f"{BASE}/_xml_guida.php"
@@ -344,79 +345,66 @@ def main():
     print(f"Total URLs to process: {total}")
 
     # Load existing places for dedup
-    conn = sqlite3.connect(str(db_path))
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name, city, country FROM places")
-    existing = [(r["id"], normalize_name(r["name"]), r["city"] or "", r["country"] or "") for r in cursor.fetchall()]
-    conn.close()
+    with db.connect() as conn:
+        dedup_map = dedup.build_dedup_map(conn)
 
-    dedup_map = {}
-    for pid, norm_name, city, country in existing:
-        key = (norm_name, (city or "").lower(), (country or "").lower())
-        dedup_map.setdefault(key, []).append(pid)
+        # Process
+        added = 0
+        updated = 0
+        skipped = 0
+        errors = 0
 
-    # Process
-    conn = sqlite3.connect(str(db_path))
-    conn.row_factory = sqlite3.Row
+        for i, url in enumerate(urls, 1):
+            print(f"[{i}/{total}] {url}")
 
-    added = 0
-    updated = 0
-    skipped = 0
-    errors = 0
+            html = fetch(url)
+            if not html:
+                errors += 1
+                continue
 
-    for i, url in enumerate(urls, 1):
-        print(f"[{i}/{total}] {url}")
-        
-        html = fetch(url)
-        if not html:
-            errors += 1
-            continue
+            place = extract_detail(html, url)
+            if not place:
+                errors += 1
+                continue
 
-        place = extract_detail(html, url)
-        if not place:
-            errors += 1
-            continue
+            # Deduplication check
+            norm_name = normalize_name(place["name"])
+            city_key = (place.get("city") or "").lower()
+            country_key = (place.get("country") or "").lower()
+            dup_key = (norm_name, city_key, country_key)
 
-        # Deduplication check
-        norm_name = normalize_name(place["name"])
-        city_key = (place.get("city") or "").lower()
-        country_key = (place.get("country") or "").lower()
-        dup_key = (norm_name, city_key, country_key)
-        
-        if dup_key in dedup_map:
-            # Existing match — add identita-golose tag
-            existing_id = dedup_map[dup_key][0]
-            cursor = conn.cursor()
-            cursor.execute("SELECT tags FROM places WHERE id = ?", (existing_id,))
-            row = cursor.fetchone()
-            if row:
-                tags = json.loads(row["tags"] or "[]")
-                if "identita-golose" not in tags:
-                    tags.append("identita-golose")
-                    cursor.execute("UPDATE places SET tags = ? WHERE id = ?",
-                                   (json.dumps(tags), existing_id))
+            if dup_key in dedup_map:
+                # Existing match — add identita-golose tag
+                existing_id = dedup_map[dup_key][0]
+                if dedup.add_tag(conn, existing_id, "identita-golose"):
                     conn.commit()
                     updated += 1
                     print(f"    → dedup: added identita-golose tag to existing place")
-            skipped += 1
-            continue
+                skipped += 1
+                continue
 
-        # Insert new place
-        db.upsert_place(conn, place)
-        dedup_map[dup_key] = [-1]  # Mark as processed
-        added += 1
-        print(f"    → added: {place['name']} ({place.get('city', '')}, {place.get('country', '')})")
+            # Insert new place
+            db.upsert_place(conn, place)
+            dedup_map[dup_key] = [-1]  # Mark as processed
+            added += 1
+            print(f"    → added: {place['name']} ({place.get('city', '')}, {place.get('country', '')})")
 
-        if i % 25 == 0:
-            conn.commit()
-            print(f"  ...committed batch ({i}/{total})")
+            if i % 25 == 0:
+                conn.commit()
+                print(f"  ...committed batch ({i}/{total})")
 
-        if args.delay > 0:
-            time.sleep(args.delay)
+            if args.delay > 0:
+                time.sleep(args.delay)
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        db.record_sync(
+            conn,
+            "identitagolose",
+            "ok" if errors == 0 else "error",
+            f"{errors} errors" if errors else "",
+            rows_added=added,
+            rows_updated=updated,
+        )
 
     print(f"\nDone. Added: {added}, Updated (tag): {updated}, Skipped (dedup): {skipped}, Errors: {errors}")
 

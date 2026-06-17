@@ -1,12 +1,7 @@
 """Sync Wirtshauskultur Niederösterreich (wirtshauskultur.at) — Austrian tavern guide.
 
-Wirtshauskultur is a curated guide to ~179 traditional taverns (Wirtshäuser)
-in Lower Austria (Niederösterreich). Each detail page has rich JSON-LD
-Schema.org Restaurant data including:
-- name, address, city, postal code, country
-- lat/lng, telephone, email
-- description, opening hours, amenities
-- identifier (imxplatform addressbase ID)
+Curated guide to ~179 traditional taverns (Wirtshäuser) in Lower Austria.
+Each detail page has rich JSON-LD Schema.org Restaurant data.
 
 Approach:
 1. Fetch sitemap.xml?sitemap=gastronomy for all restaurant URLs
@@ -20,66 +15,47 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sqlite3
 import sys
 import time
 import urllib.error
-import urllib.request
-import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).parent))
 import db  # noqa: E402
+import dedup  # noqa: E402
+import httputil  # noqa: E402
+import sitemap  # noqa: E402
 
 BASE = "https://www.wirtshauskultur.at"
 SITEMAP_INDEX = f"{BASE}/sitemap.xml"
-NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-DB_PATH = Path(__file__).resolve().parent.parent / "data" / "restaurants.db"
 REQUEST_DELAY = 0.5
+USER_AGENT = "Mozilla/5.0 (compatible; NomnomBot/1.0)"
 
 SOURCE_NAME = "wirtshauskultur"
 DEDUP_TAG = "wirtshauskultur"
-HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; NomnomBot/1.0)"}
 
 
 # ── Sitemap ──────────────────────────────────────────────────
 
 
 def fetch_sitemap_urls() -> list[str]:
-    """Return all gastronomie URLs from the sitemap."""
-    req = urllib.request.Request(SITEMAP_INDEX, headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=15) as r:
-        index_root = ET.fromstring(r.read())
+    """Return all gastronomie URLs from the sitemap.
 
-    gastro_url = None
-    for loc in index_root.findall(".//sm:loc", NS):
-        if loc.text and "gastronomy" in (loc.text or "").lower():
-            gastro_url = loc.text.strip()
-            break
-
-    if not gastro_url:
-        raise RuntimeError("Gastronomy sitemap not found in sitemap index")
-
-    req = urllib.request.Request(gastro_url, headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=20) as r:
-        gastro_root = ET.fromstring(r.read())
-
-    urls = []
-    for loc in gastro_root.findall(".//sm:loc", NS):
-        if loc.text and "/gastronomie/" in loc.text:
-            urls.append(loc.text.strip())
-
-    return urls
+    The sitemap index lists a child sitemap whose name contains
+    "gastronomy"; we filter that to /gastronomie/ paths.
+    """
+    # sitemap.iter_urls returns everything from all child sitemaps,
+    # but we need to find the "gastronomy" child first. Use iter_urls
+    # with a filter that keeps /gastronomie/ paths.
+    return sitemap.iter_urls(
+        SITEMAP_INDEX,
+        path_filter=lambda u: "/gastronomie/" in u,
+        timeout=20,
+        user_agent=USER_AGENT,
+    )
 
 
 # ── Detail page ──────────────────────────────────────────────
-
-
-def fetch_page(url: str, timeout: int = 15) -> str:
-    req = urllib.request.Request(url, headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", errors="replace")
 
 
 # Schema.org types we consider as places (not just Restaurant)
@@ -97,7 +73,6 @@ def extract_json_ld_restaurant(html: str) -> dict | None:
         except json.JSONDecodeError:
             continue
 
-        # Check for mainEntity containing a place type
         if isinstance(data, dict) and "mainEntity" in data:
             entities = data["mainEntity"]
             if isinstance(entities, dict):
@@ -106,7 +81,6 @@ def extract_json_ld_restaurant(html: str) -> dict | None:
                 if isinstance(entity, dict) and entity.get("@type") in PLACE_TYPES:
                     return entity
 
-        # Direct place type
         if isinstance(data, dict) and data.get("@type") in PLACE_TYPES:
             return data
 
@@ -175,31 +149,6 @@ def parse_restaurant(url: str, html: str) -> dict | None:
     return place
 
 
-# ── Dedup helpers ────────────────────────────────────────────
-
-
-def normalize_name(name: str) -> str:
-    import unicodedata
-    name = name.lower().strip()
-    name = unicodedata.normalize("NFKD", name)
-    name = "".join(c for c in name if not unicodedata.combining(c))
-    name = re.sub(r"[^a-z0-9]", "", name)
-    return name
-
-
-def build_dedup_map(conn: sqlite3.Connection) -> dict:
-    cursor = conn.execute("SELECT id, name, city, country FROM places")
-    dup_map: dict = {}
-    for row in cursor.fetchall():
-        key = (
-            normalize_name(row["name"]),
-            (row["city"] or "").lower().strip(),
-            (row["country"] or "").lower().strip(),
-        )
-        dup_map.setdefault(key, []).append(row["id"])
-    return dup_map
-
-
 # ── Main sync ────────────────────────────────────────────────
 
 
@@ -211,77 +160,69 @@ def sync(max_urls: int | None = None, verbose: bool = True):
         urls = urls[:max_urls]
         print(f"Limited to {len(urls)} URLs")
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    dedup_map = build_dedup_map(conn)
-
     added = 0
     updated = 0
     skipped = 0
     errors = 0
+    err_msg = ""
 
-    for i, url in enumerate(urls, 1):
-        if verbose and i % 10 == 0:
-            print(f"  [{i}/{len(urls)}] added={added} updated={updated} skipped={skipped} errors={errors}")
+    with db.connect() as conn:
+        dedup_map = dedup.build_dedup_map(conn)
 
-        try:
-            html = fetch_page(url)
-        except Exception as e:
-            print(f"  HTTP error {url}: {e}")
-            errors += 1
-            continue
+        for i, url in enumerate(urls, 1):
+            if verbose and i % 10 == 0:
+                print(f"  [{i}/{len(urls)}] added={added} updated={updated} skipped={skipped} errors={errors}")
 
-        place = parse_restaurant(url, html)
-        if not place:
-            errors += 1
-            continue
+            try:
+                html = httputil.fetch_page(url, user_agent=USER_AGENT)
+            except Exception as e:
+                print(f"  HTTP error {url}: {e}")
+                errors += 1
+                continue
 
-        dup_key = (
-            normalize_name(place["name"]),
-            (place.get("city") or "").lower(),
-            place.get("country", "").lower(),
-        )
-        if dup_key in dedup_map and dedup_map[dup_key]:
-            existing_id = dedup_map[dup_key][0]
-            cursor = conn.execute("SELECT tags FROM places WHERE id = ?", (existing_id,))
-            row = cursor.fetchone()
-            tags = []
-            if row and row["tags"]:
-                try:
-                    tags = json.loads(row["tags"])
-                except json.JSONDecodeError:
-                    pass
-            if DEDUP_TAG not in tags:
-                tags.append(DEDUP_TAG)
-                conn.execute(
-                    "UPDATE places SET tags = ? WHERE id = ?",
-                    (json.dumps(tags, ensure_ascii=False), existing_id),
-                )
+            place = parse_restaurant(url, html)
+            if not place:
+                errors += 1
+                continue
+
+            key = dedup.dup_key(place)
+            if key in dedup_map and dedup_map[key]:
+                existing_id = dedup_map[key][0]
+                if dedup.add_tag(conn, existing_id, DEDUP_TAG):
+                    conn.commit()
+                    updated += 1
+                    if verbose:
+                        print(f"  → dedup: added tag to existing id={existing_id}")
+                else:
+                    skipped += 1
+                continue
+
+            try:
+                was_new, _pid = db.upsert_place(conn, place)
                 conn.commit()
-                updated += 1
-                if verbose:
-                    print(f"  → dedup: added tag to existing id={existing_id}")
-            else:
-                skipped += 1
-            continue
+                if was_new:
+                    added += 1
+                    if verbose:
+                        print(f"  + added: {place['name']} ({place['city']}, {place['country']})")
+                else:
+                    updated += 1
+            except Exception as e:
+                print(f"  DB error: {e}")
+                errors += 1
+                err_msg = str(e)
 
-        try:
-            was_new, pid = db.upsert_place(conn, place)
-            conn.commit()
-            if was_new:
-                added += 1
-                if verbose:
-                    print(f"  + added: {place['name']} ({place['city']}, {place['country']})")
-            else:
-                updated += 1
-        except Exception as e:
-            print(f"  DB error: {e}")
-            errors += 1
+            dedup_map[key] = [-1]
+            time.sleep(REQUEST_DELAY)
 
-        dedup_map[dup_key] = [-1]
-        time.sleep(REQUEST_DELAY)
+        db.record_sync(
+            conn,
+            SOURCE_NAME,
+            "ok" if errors == 0 else "error",
+            err_msg or (f"{errors} errors" if errors else ""),
+            rows_added=added,
+            rows_updated=updated,
+        )
 
-    conn.close()
     print(f"\nDone. Added: {added}, Updated (tag): {updated}, Skipped (dedup): {skipped}, Errors: {errors}")
     return added, updated
 
