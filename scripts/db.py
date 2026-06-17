@@ -79,7 +79,13 @@ def connect(db_path: Optional[Path] = None) -> Iterator[sqlite3.Connection]:
 
 
 def upsert_place(conn: sqlite3.Connection, place: dict) -> tuple[bool, int]:
-    """Insert or update a place. Returns (was_new, place_id)."""
+    """Insert or update a place. Returns (was_new, place_id).
+
+    Atomic: uses INSERT ... ON CONFLICT(source, source_id) DO UPDATE so
+    concurrent syncs on the same source_id can't race the SELECT-then-INSERT.
+    The pre-check via SELECT is only to determine the was_new return value;
+    the actual write is atomic and survives concurrent calls.
+    """
     required = {"source", "source_id", "source_url", "name"}
     missing = required - set(place)
     if missing:
@@ -98,26 +104,26 @@ def upsert_place(conn: sqlite3.Connection, place: dict) -> tuple[bool, int]:
         "description", "tags", "raw_json", "fetched_at",
     ]
     values = [place.get(c) for c in cols]
+    placeholders = ", ".join("?" * len(cols))
+    update_cols = [c for c in cols if c != "source" and c != "source_id"]
+    set_clause = ", ".join(f"{c} = excluded.{c}" for c in update_cols)
 
-    cur = conn.execute(
+    # Pre-check (read-only) for was_new signal — does not race the write
+    existed = conn.execute(
         "SELECT id FROM places WHERE source = ? AND source_id = ?",
         (place["source"], place["source_id"]),
+    ).fetchone()
+
+    conn.execute(
+        f"""INSERT INTO places ({', '.join(cols)}) VALUES ({placeholders})
+            ON CONFLICT(source, source_id) DO UPDATE SET {set_clause}""",
+        values,
     )
-    row = cur.fetchone()
-    if row is None:
-        placeholders = ", ".join("?" * len(cols))
-        conn.execute(
-            f"INSERT INTO places ({', '.join(cols)}) VALUES ({placeholders})",
-            values,
-        )
-        return True, conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-    else:
-        set_clause = ", ".join(f"{c} = ?" for c in cols)
-        conn.execute(
-            f"UPDATE places SET {set_clause} WHERE id = ?",
-            values + [row["id"]],
-        )
-        return False, row["id"]
+    place_id = conn.execute(
+        "SELECT id FROM places WHERE source = ? AND source_id = ?",
+        (place["source"], place["source_id"]),
+    ).fetchone()[0]
+    return existed is None, place_id
 
 
 def record_sync(
@@ -149,6 +155,11 @@ def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     dl = math.radians(lng2 - lng1)
     a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
     return 2 * R * math.asin(math.sqrt(a))
+
+
+def _escape_like(s: str) -> str:
+    """Escape LIKE wildcards so user input is treated literally."""
+    return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 def search_near(
@@ -183,11 +194,11 @@ def search_near(
         query += f" AND source IN ({','.join('?' * len(srcs))})"
         params.extend(srcs)
     if cuisine:
-        query += " AND cuisine LIKE ?"
-        params.append(f"%{cuisine}%")
+        query += " AND cuisine LIKE ? ESCAPE '\\'"
+        params.append(f"%{_escape_like(cuisine)}%")
     if keyword:
-        query += " AND (name LIKE ? OR description LIKE ? OR tags LIKE ?)"
-        kw = f"%{keyword}%"
+        query += " AND (name LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\' OR tags LIKE ? ESCAPE '\\')"
+        kw = f"%{_escape_like(keyword)}%"
         params.extend([kw, kw, kw])
 
     rows = [dict(r) for r in conn.execute(query, params)]

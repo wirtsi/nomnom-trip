@@ -58,56 +58,65 @@ def main() -> int:
     src_size = SRC.stat().st_size
     print(f"Source: {SRC}  {src_size / 1024 / 1024:.2f} MB")
 
-    if DST.exists():
-        DST.unlink()
+    # Write to a temp file first, then atomically rename. This avoids
+    # leaving the PWA without a DB if the export fails mid-write, and
+    # avoids serving a half-written file to concurrent readers.
+    tmp_dst = DST.with_suffix(".tmp")
+    if tmp_dst.exists():
+        tmp_dst.unlink()
 
-    src = sqlite3.connect(SRC)
-    src.row_factory = sqlite3.Row
-    dst = sqlite3.connect(DST)
-    dst.executescript(PWA_SCHEMA)
+    try:
+        with sqlite3.connect(SRC) as src, sqlite3.connect(tmp_dst) as dst:
+            src.row_factory = sqlite3.Row
+            dst.executescript(PWA_SCHEMA)
 
-    cur = src.execute(
-        """SELECT id, source, source_id, source_url, name, category, cuisine,
-                  address, city, region, country, lat, lng, description, tags,
-                  fetched_at
-             FROM places"""
-    )
-    cols = [d[0] for d in cur.description]
-    placeholders = ", ".join("?" * len(cols))
-    insert = f"INSERT INTO places ({', '.join(cols)}) VALUES ({placeholders})"
+            cur = src.execute(
+                """SELECT id, source, source_id, source_url, name, category, cuisine,
+                          address, city, region, country, lat, lng, description, tags,
+                          fetched_at
+                     FROM places"""
+            )
+            cols = [d[0] for d in cur.description]
+            placeholders = ", ".join("?" * len(cols))
+            insert = f"INSERT INTO places ({', '.join(cols)}) VALUES ({placeholders})"
 
-    batch: list[tuple] = []
-    n = 0
-    for row in cur:
-        d = dict(row)
-        desc = d.get("description") or ""
-        if len(desc) > 500:
-            desc = desc[:500].rstrip() + "…"
-        d["description"] = desc or None
-        batch.append(tuple(d[c] for c in cols))
-        if len(batch) >= 1000:
-            dst.executemany(insert, batch)
-            n += len(batch)
-            batch.clear()
-    if batch:
-        dst.executemany(insert, batch)
-        n += len(batch)
-    print(f"Copied {n} places.")
+            batch: list[tuple] = []
+            n = 0
+            for row in cur:
+                d = dict(row)
+                desc = d.get("description") or ""
+                if len(desc) > 500:
+                    desc = desc[:500].rstrip() + "…"
+                d["description"] = desc or None
+                batch.append(tuple(d[c] for c in cols))
+                if len(batch) >= 1000:
+                    dst.executemany(insert, batch)
+                    n += len(batch)
+                    batch.clear()
+            if batch:
+                dst.executemany(insert, batch)
+                n += len(batch)
+            print(f"Copied {n} places.")
 
-    canon_rows = src.execute(
-        "SELECT place_id, canonical_id FROM canonical_links"
-    ).fetchall()
-    dst.executemany(
-        "INSERT INTO canonical_links (place_id, canonical_id) VALUES (?, ?)",
-        [(r["place_id"], r["canonical_id"]) for r in canon_rows],
-    )
-    print(f"Copied {len(canon_rows)} canonical_links.")
+            canon_rows = src.execute(
+                "SELECT place_id, canonical_id FROM canonical_links"
+            ).fetchall()
+            dst.executemany(
+                "INSERT INTO canonical_links (place_id, canonical_id) VALUES (?, ?)",
+                [(r["place_id"], r["canonical_id"]) for r in canon_rows],
+            )
+            print(f"Copied {len(canon_rows)} canonical_links.")
 
-    dst.commit()
-    dst.execute("VACUUM")
-    dst.commit()
-    src.close()
-    dst.close()
+            dst.commit()
+            dst.execute("VACUUM")
+            dst.commit()
+
+        # Atomic swap — only happens after the tmp file is fully written.
+        import os as _os
+        _os.replace(tmp_dst, DST)
+    finally:
+        if tmp_dst.exists():
+            tmp_dst.unlink()
 
     dst_size = DST.stat().st_size
     print(f"Output: {DST}  {dst_size / 1024 / 1024:.2f} MB")
@@ -116,30 +125,27 @@ def main() -> int:
         f"({100 * (1 - dst_size / src_size):.1f}% smaller)"
     )
 
-    # Inject a cache-busting timestamp into the PWA so users never get a stale DB
-    timestamp = str(int(__import__("time").time()))
-    app_js = ROOT / "app.js"
-    if app_js.exists():
-        content = app_js.read_text()
-        content = __import__("re").sub(
-            r'restaurants\.pwa\.db\?t=\d+',
-            f"restaurants.pwa.db?t={timestamp}",
-            content,
-        )
-        app_js.write_text(content)
-        print(f"Bumped DB_URL cache-buster to t={timestamp}")
-
-    # Bump SW cache name so shell assets are re-fetched on next load
+    # Inject a cache-busting timestamp into the PWA so users never get a stale DB.
+    # Bump SW cache name FIRST, then app.js DB_URL — if the script crashes between
+    # the two writes, a stale SW with a new DB_URL just re-fetches the new DB on
+    # next SW update; the reverse would cache the old DB URL forever.
+    import re as _re
+    import time as _time
+    timestamp = str(int(_time.time()))
     sw_js = ROOT / "sw.js"
+    app_js = ROOT / "app.js"
     if sw_js.exists():
         content = sw_js.read_text()
-        content = __import__("re").sub(
-            r'const CACHE = "nomnom-[^"]+"',
-            f'const CACHE = "nomnom-{timestamp}"',
-            content,
-        )
-        sw_js.write_text(content)
-        print(f"Bumped SW cache name to nomnom-{timestamp}")
+        new_sw = _re.sub(r'const CACHE = "nomnom-[^"]+"', f'const CACHE = "nomnom-{timestamp}"', content)
+        if new_sw != content:
+            sw_js.write_text(new_sw)
+            print(f"Bumped SW cache name to nomnom-{timestamp}")
+    if app_js.exists():
+        content = app_js.read_text()
+        new_app = _re.sub(r'restaurants\.pwa\.db\?t=\d+', f"restaurants.pwa.db?t={timestamp}", content)
+        if new_app != content:
+            app_js.write_text(new_app)
+            print(f"Bumped DB_URL cache-buster to t={timestamp}")
 
     return 0
 

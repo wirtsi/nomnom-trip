@@ -1,7 +1,7 @@
 // nomnom PWA — vanilla JS app driving sql.js + Leaflet.
 // Mirrors scripts/db.py:search_near() so results match the CLI byte-for-byte.
 
-const DB_URL = `./data/restaurants.pwa.db?t=1781713982`; // set by export_pwa_db.py
+const DB_URL = `./data/restaurants.pwa.db?t=1781720801`; // set by export_pwa_db.py
 const SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine", "identitagolose", "gaultmillau", "wirtshauskultur", "mitvergnuegen"];
 
 const els = {
@@ -17,6 +17,11 @@ const els = {
   results: document.getElementById("results"),
   status: document.getElementById("status"),
 };
+// Fail loudly if the HTML template is missing an element we depend on,
+// instead of cryptic TypeError: Cannot read properties of null later.
+for (const [k, v] of Object.entries(els)) {
+  if (!v) throw new Error(`nomnom: missing DOM element for "${k}"`);
+}
 
 let db = null;
 let map = null;
@@ -89,8 +94,10 @@ function searchNear({
     params.push(...sources);
   }
   if (searchText) {
-    sql += " AND (name LIKE ? OR cuisine LIKE ? OR description LIKE ? OR tags LIKE ?)";
-    const kw = `%${searchText}%`;
+    // Escape LIKE wildcards so user input is treated literally
+    const escaped = searchText.replace(/[%_\\]/g, "\\$&");
+    sql += " AND (name LIKE ? ESCAPE '\\' OR cuisine LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\' OR tags LIKE ? ESCAPE '\\')";
+    const kw = `%${escaped}%`;
     params.push(kw, kw, kw, kw);
   }
 
@@ -129,7 +136,10 @@ function searchNear({
       if (r.tags) {
         try {
           r.tags = JSON.parse(r.tags);
-        } catch (_) {}
+        } catch (e) {
+          console.warn("Bad tags JSON for place", r.id, e.message);
+          r.tags = [];
+        }
       }
     }
   }
@@ -138,6 +148,16 @@ function searchNear({
 }
 
 // ---- UI -----------------------------------------------------------------
+// Module-level debounce for auto-reload on filter changes.
+let _searchTimeout = null;
+function autoSearch() {
+  if (_searchTimeout) return;
+  _searchTimeout = setTimeout(() => {
+    _searchTimeout = null;
+    runSearch(lastCenter);
+  }, 250);
+}
+
 function setStatus(msg, isError = false) {
   const spinner = db ? '' : '<span class="spinner"></span>';
   // spinner is trusted HTML; msg may contain user input — escape it.
@@ -154,11 +174,9 @@ function renderSourceCheckboxes() {
     label.innerHTML = `<input type="checkbox" id="${id}" value="${s}" checked> ${s}`;
     els.sources.appendChild(label);
   }
-  // Auto-reload when any source checkbox toggles
+  // Auto-reload when any source checkbox toggles (shared 250ms debounce)
   for (const cb of els.sources.querySelectorAll('input[type="checkbox"]')) {
-    cb.addEventListener("change", () => {
-      setTimeout(() => runSearch(lastCenter), 50);
-    });
+    cb.addEventListener("change", autoSearch);
   }
 }
 
@@ -279,15 +297,22 @@ async function runSearch(center) {
     }…`
   );
 
-  const rows = searchNear({
-    lat: center.lat,
-    lng: center.lng,
-    radiusKm: parseFloat(els.radius.value),
-    category: els.category.value || null,
-    sources: getSelectedSources(),
-    searchText: els.searchText.value.trim() || null,
-    limit: Math.min(Math.max(parseInt(els.limit.value, 10) || 200, 10), 1000),
-  });
+  let rows;
+  try {
+    rows = searchNear({
+      lat: center.lat,
+      lng: center.lng,
+      radiusKm: parseFloat(els.radius.value),
+      category: els.category.value || null,
+      sources: getSelectedSources(),
+      searchText: els.searchText.value.trim() || null,
+      limit: Math.min(Math.max(parseInt(els.limit.value, 10) || 200, 10), 1000),
+    });
+  } catch (e) {
+    setStatus(`Search failed: ${e.message}`, true);
+    console.error(e);
+    return;
+  }
 
   setStatus(`${rows.length} result${rows.length === 1 ? "" : "s"}.`);
   renderResults(rows, center);
@@ -364,22 +389,9 @@ function wireEvents() {
   els.q.addEventListener("keydown", (e) => {
     if (e.key === "Enter") runSearch(null);
   });
-  // Auto-reload on any filter change
-  let searchTimeout = null;
-  function autoSearch() {
-    if (searchTimeout) return;
-    searchTimeout = setTimeout(() => {
-      searchTimeout = null;
-      runSearch(lastCenter);
-    }, 250);
-  }
   els.category.addEventListener("change", autoSearch);
   els.searchText.addEventListener("input", autoSearch);
   els.limit.addEventListener("change", autoSearch);
-  const limitCheckbox = document.getElementById("limit-checkbox");
-  if (limitCheckbox) {
-    limitCheckbox.addEventListener("change", autoSearch);
-  }
   els.geo.addEventListener("click", useMyLocation);
 }
 
@@ -394,6 +406,10 @@ function wireEvents() {
     console.error(e);
   }
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(console.error);
+    navigator.serviceWorker.register("./sw.js").catch((e) => {
+      console.error("SW registration failed:", e);
+      // Non-blocking — app still works online, just no offline mode.
+      setStatus("Offline mode unavailable: " + (e.message || "SW failed"), true);
+    });
   }
 })();
