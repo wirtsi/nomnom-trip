@@ -41,8 +41,8 @@ def run_one(name: str, **kwargs) -> tuple[str, int, int, str]:
                 )
             elif name == "rawwine":
                 added, updated = mod.sync(max_pages=kwargs.get("max_pages", 500))
-            elif name in ("wirtshauskultur", "mitvergnuegen"):
-                added, updated = mod.sync(max_urls=kwargs.get("max_urls"))
+            elif name in ("wirtshauskultur", "mitvergnuegen", "identitagolose"):
+                added, updated = mod.sync(max_urls=kwargs.get("max_urls") or 0)
             else:
                 added, updated = mod.sync()
         elapsed = time.time() - started

@@ -313,49 +313,50 @@ def get_sitemap_urls(sitemap_url: str, max_urls: int = 0) -> list[str]:
         return []
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Sync Identità Golose guide")
-    parser.add_argument("--max-urls", type=int, default=0, help="Limit URLs processed (0 = all)")
-    parser.add_argument("--delay", type=float, default=0.5, help="Seconds between requests")
-    parser.add_argument("--db", type=str, default=str(db.DB_PATH), help="SQLite database path")
-    parser.add_argument("--source", choices=["ristoranti", "pec", "both"], default="both",
-                       help="Which guide to sync: restaurants, pec (pizza/cocktail), or both")
-    args = parser.parse_args()
+def sync(
+    max_urls: int = 0,
+    delay: float = 0.5,
+    source: str = "both",
+    verbose: bool = True,
+) -> tuple[int, int]:
+    """Sync Identità Golose guide.
 
-    db_path = Path(args.db)
-    if not db_path.exists():
-        print(f"Database not found at {db_path}")
-        sys.exit(1)
+    Args:
+        max_urls: Limit URLs processed (0 = all).
+        delay: Seconds between requests.
+        source: "ristoranti", "pec", or "both".
+        verbose: Print per-URL progress.
 
+    Returns: (added, updated).
+    """
     # Collect URLs
-    urls = []
-    if args.source in ("ristoranti", "both"):
-        print("Fetching restaurant sitemap...")
-        urls.extend(get_sitemap_urls(GUIDE_SITEMAP, args.max_urls if args.source == "ristoranti" else 0))
-    if args.source in ("pec", "both"):
-        print("Fetching pizza/cocktail sitemap...")
-        pec_urls = get_sitemap_urls(PEC_SITEMAP, args.max_urls if args.source == "pec" else 0)
+    urls: list[str] = []
+    if source in ("ristoranti", "both"):
+        print("Fetching restaurant sitemap...") if verbose else None
+        urls.extend(get_sitemap_urls(GUIDE_SITEMAP, max_urls if source == "ristoranti" else 0))
+    if source in ("pec", "both"):
+        print("Fetching pizza/cocktail sitemap...") if verbose else None
+        pec_urls = get_sitemap_urls(PEC_SITEMAP, max_urls if source == "pec" else 0)
         urls.extend(pec_urls)
 
     if not urls:
         print("No URLs found in sitemap")
-        sys.exit(0)
+        return 0, 0
 
     total = len(urls)
-    print(f"Total URLs to process: {total}")
+    print(f"Total URLs to process: {total}") if verbose else None
 
-    # Load existing places for dedup
+    added = 0
+    updated = 0
+    skipped = 0
+    errors = 0
+
     with db.connect() as conn:
         dedup_map = dedup.build_dedup_map(conn)
 
-        # Process
-        added = 0
-        updated = 0
-        skipped = 0
-        errors = 0
-
         for i, url in enumerate(urls, 1):
-            print(f"[{i}/{total}] {url}")
+            if verbose:
+                print(f"[{i}/{total}] {url}")
 
             html = fetch(url)
             if not html:
@@ -374,12 +375,12 @@ def main():
             dup_key = (norm_name, city_key, country_key)
 
             if dup_key in dedup_map:
-                # Existing match — add identita-golose tag
                 existing_id = dedup_map[dup_key][0]
                 if dedup.add_tag(conn, existing_id, "identita-golose"):
                     conn.commit()
                     updated += 1
-                    print(f"    → dedup: added identita-golose tag to existing place")
+                    if verbose:
+                        print(f"    → dedup: added identita-golose tag to existing place")
                 skipped += 1
                 continue
 
@@ -387,14 +388,16 @@ def main():
             db.upsert_place(conn, place)
             dedup_map[dup_key] = [-1]  # Mark as processed
             added += 1
-            print(f"    → added: {place['name']} ({place.get('city', '')}, {place.get('country', '')})")
+            if verbose:
+                print(f"    → added: {place['name']} ({place.get('city', '')}, {place.get('country', '')})")
 
             if i % 25 == 0:
                 conn.commit()
-                print(f"  ...committed batch ({i}/{total})")
+                if verbose:
+                    print(f"  ...committed batch ({i}/{total})")
 
-            if args.delay > 0:
-                time.sleep(args.delay)
+            if delay > 0:
+                time.sleep(delay)
 
         conn.commit()
         db.record_sync(
@@ -407,6 +410,18 @@ def main():
         )
 
     print(f"\nDone. Added: {added}, Updated (tag): {updated}, Skipped (dedup): {skipped}, Errors: {errors}")
+    return added, updated
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Sync Identità Golose guide")
+    parser.add_argument("--max-urls", type=int, default=0, help="Limit URLs processed (0 = all)")
+    parser.add_argument("--delay", type=float, default=0.5, help="Seconds between requests")
+    parser.add_argument("--db", type=str, default=str(db.DB_PATH), help="SQLite database path (ignored; uses db.connect())")
+    parser.add_argument("--source", choices=["ristoranti", "pec", "both"], default="both",
+                       help="Which guide to sync: restaurants, pec (pizza/cocktail), or both")
+    args = parser.parse_args()
+    sync(max_urls=args.max_urls, delay=args.delay, source=args.source)
 
 
 if __name__ == "__main__":

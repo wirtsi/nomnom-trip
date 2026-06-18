@@ -257,6 +257,17 @@ def ingest_mitvergnuegen(*, city: str = "all", max_posts: int = 0, max_tips: int
     return total_added, total_updated
 
 
+def sync(max_urls: int | None = None, **_kwargs) -> tuple[int, int]:
+    """Dispatcher-compatible wrapper around ingest_mitvergnuegen.
+
+    sync.py calls `mod.sync(max_urls=...)` for sources listed in the
+    `wirtshauskultur/mitvergnuegen` branch. Map `max_urls` to `max_tips`
+    (0 = unlimited) and call the real ingester.
+    """
+    max_tips = max_urls or 0
+    return ingest_mitvergnuegen(city="all", max_posts=0, max_tips=max_tips)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--city", choices=["all"] + list(CITIES.keys()), default="all")
