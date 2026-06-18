@@ -66,7 +66,7 @@ def fetch_json(url: str, timeout: int = 15) -> Optional[dict]:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             data = resp.read().decode("utf-8", errors="replace")
             return json.loads(data)
-    except (urllib.error.URLError, json.JSONDecodeError) as e:
+    except (urllib.error.URLError, json.JSONDecodeError, TimeoutError, OSError) as e:
         print(f"  [ERROR] {url}: {e}")
         return None
 
@@ -76,7 +76,7 @@ def fetch_html(url: str, timeout: int = 15) -> Optional[str]:
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return resp.read().decode("utf-8", errors="replace")
-    except urllib.error.URLError as e:
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
         print(f"  [ERROR] {url}: {e}")
         return None
 
@@ -180,70 +180,79 @@ def ingest_mitvergnuegen(*, city: str = "all", max_posts: int = 0, max_tips: int
     with db.connect() as conn:
         cities_to_scrape = list(CITIES.items()) if city == "all" else [(city, CITIES[city])]
         for city_slug, city_cfg in cities_to_scrape:
-            domain = city_cfg["domain"]
-            print(f"\n=== {city_slug.upper()}: {domain} ===")
-            cats_url = f"https://{domain}/wp-json/wp/v2/categories?per_page=100"
-            cats_data = fetch_json(cats_url)
-            food_cat_ids = []
-            if cats_data:
-                for cat in cats_data:
-                    if cat.get("slug") in ("food", "ausgehen", "erlebnis"):
-                        food_cat_ids.append(cat["id"])
-            if not food_cat_ids:
-                print(f"  No categories found for {city_slug}")
-                continue
-            print(f"  Category IDs: {food_cat_ids}")
-            all_posts = []
-            page = 1
-            while True:
-                posts = get_wp_posts(domain, food_cat_ids, per_page=100, page=page)
-                if not posts:
-                    break
-                all_posts.extend(posts)
-                print(f"  Page {page}: +{len(posts)} posts (total {len(all_posts)})")
-                if max_posts and len(all_posts) >= max_posts:
-                    all_posts = all_posts[:max_posts]
-                    break
-                page += 1
-                time.sleep(RE_DELAY)
-            print(f"  Total posts to process: {len(all_posts)}")
-            tip_ids = set()
-            post_count = 0
-            for post in all_posts:
-                link = post.get("link", "")
-                if not link:
+            # Per-city try/except: a transient timeout on one city
+            # (e.g. wp-json pagination) shouldn't fail the whole sync —
+            # other cities are independent and we want record_sync to log.
+            try:
+                domain = city_cfg["domain"]
+                print(f"\n=== {city_slug.upper()}: {domain} ===")
+                cats_url = f"https://{domain}/wp-json/wp/v2/categories?per_page=100"
+                cats_data = fetch_json(cats_url)
+                food_cat_ids = []
+                if cats_data:
+                    for cat in cats_data:
+                        if cat.get("slug") in ("food", "ausgehen", "erlebnis"):
+                            food_cat_ids.append(cat["id"])
+                if not food_cat_ids:
+                    print(f"  No categories found for {city_slug}")
                     continue
-                html = fetch_html(link)
-                if html:
-                    ids = extract_tip_ids_from_html(html)
-                    tip_ids.update(ids)
-                    post_count += 1
-                    if post_count % 5 == 0:
-                        print(f"  [{post_count}/{len(all_posts)}] {len(ids)} tips from post (total unique: {len(tip_ids)})")
+                print(f"  Category IDs: {food_cat_ids}")
+                all_posts = []
+                page = 1
+                while True:
+                    posts = get_wp_posts(domain, food_cat_ids, per_page=100, page=page)
+                    if not posts:
+                        break
+                    all_posts.extend(posts)
+                    print(f"  Page {page}: +{len(posts)} posts (total {len(all_posts)})")
+                    if max_posts and len(all_posts) >= max_posts:
+                        all_posts = all_posts[:max_posts]
+                        break
+                    page += 1
                     time.sleep(RE_DELAY)
-                if max_tips and len(tip_ids) >= max_tips:
-                    tip_ids = set(sorted(tip_ids)[:max_tips])
-                    break
-            print(f"  Total unique tips: {len(tip_ids)}")
-            processed = 0
-            for tip_id in sorted(tip_ids):
-                data = fetch_tip_detail(domain, tip_id)
-                if not data:
-                    continue
-                place = tip_to_place(data, city_cfg)
-                if not place:
-                    continue
-                is_new, _ = db.upsert_place(conn, place)
-                if is_new:
-                    total_added += 1
-                else:
-                    total_updated += 1
-                processed += 1
-                if processed % 10 == 0:
-                    print(f"  [{processed}/{len(tip_ids)}] added={total_added} updated={total_updated}")
-                if processed % 50 == 0:
-                    conn.commit()
-                time.sleep(RE_DELAY)
+                print(f"  Total posts to process: {len(all_posts)}")
+                tip_ids = set()
+                post_count = 0
+                for post in all_posts:
+                    link = post.get("link", "")
+                    if not link:
+                        continue
+                    html = fetch_html(link)
+                    if html:
+                        ids = extract_tip_ids_from_html(html)
+                        tip_ids.update(ids)
+                        post_count += 1
+                        if post_count % 5 == 0:
+                            print(f"  [{post_count}/{len(all_posts)}] {len(ids)} tips from post (total unique: {len(tip_ids)})")
+                        time.sleep(RE_DELAY)
+                    if max_tips and len(tip_ids) >= max_tips:
+                        tip_ids = set(sorted(tip_ids)[:max_tips])
+                        break
+                print(f"  Total unique tips: {len(tip_ids)}")
+                processed = 0
+                for tip_id in sorted(tip_ids):
+                    data = fetch_tip_detail(domain, tip_id)
+                    if not data:
+                        continue
+                    place = tip_to_place(data, city_cfg)
+                    if not place:
+                        continue
+                    is_new, _ = db.upsert_place(conn, place)
+                    if is_new:
+                        total_added += 1
+                    else:
+                        total_updated += 1
+                    processed += 1
+                    if processed % 10 == 0:
+                        print(f"  [{processed}/{len(tip_ids)}] added={total_added} updated={total_updated}")
+                    if processed % 50 == 0:
+                        conn.commit()
+                    time.sleep(RE_DELAY)
+            except Exception as e:
+                print(f"\n[{city_slug}] FAILED: {type(e).__name__}: {e}", flush=True)
+                import traceback
+                traceback.print_exc()
+                continue
         conn.commit()
         db.record_sync(
             conn,
