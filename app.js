@@ -1,7 +1,7 @@
 // nomnom PWA — vanilla JS app driving sql.js + Leaflet.
 // Mirrors scripts/db.py:search_near() so results match the CLI byte-for-byte.
 
-const DB_URL = `./data/restaurants.pwa.db?t=1782569759`; // set by export_pwa_db.py
+const DB_URL = `./data/restaurants.pwa.db?t=1782794185`; // set by export_pwa_db.py
 const SOURCES = ["michelin", "splendido", "raisin", "gambero", "blog", "rawwine", "identitagolose", "gaultmillau", "wirtshauskultur", "mitvergnuegen"];
 
 const els = {
@@ -360,6 +360,10 @@ async function loadDb() {
   els.search.disabled = true;
   els.geo.disabled = true;
   const SQL = await initSqlJs({ locateFile: () => "./sqlite3.wasm" });
+  // The SW intercepts this fetch and serves the cached DB if available.
+  // On first load (or after a DB update), it fetches from network and
+  // caches the response.  The ?t= cache-buster ensures we get the new
+  // version when the DB changes; the SW stores under pathname-only key.
   const resp = await fetch(DB_URL);
   if (!resp.ok) throw new Error(`DB fetch failed: ${resp.status}`);
   const buf = new Uint8Array(await resp.arrayBuffer());
