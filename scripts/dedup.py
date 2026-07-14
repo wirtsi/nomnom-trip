@@ -40,7 +40,7 @@ def build_dedup_map(conn: sqlite3.Connection) -> dict:
         key = (
             normalize_name(row["name"]),
             (row["city"] or "").lower().strip(),
-            (row["country"] or "").lower().strip(),
+            _normalize_country(row["country"] or ""),
         )
         dup_map.setdefault(key, []).append(row["id"])
     return dup_map
@@ -73,10 +73,33 @@ def add_tag(conn: sqlite3.Connection, place_id: int, tag: str) -> bool:
     return True
 
 
+_COUNTRY_ALIASES = {
+    "österreich": "austria",
+    "deutschland": "germany",
+    "schweiz": "switzerland",
+    "italia": "italy",
+    "españa": "spain",
+    "france": "france",
+    "nederland": "netherlands",
+    "belgique": "belgium",
+    "slovenija": "slovenia",
+    "hrvatska": "croatia",
+    "magyarország": "hungary",
+    "polska": "poland",
+    "česko": "czech republic",
+    "slovensko": "slovakia",
+}
+
+
+def _normalize_country(country: str) -> str:
+    c = country.lower().strip()
+    return _COUNTRY_ALIASES.get(c, c)
+
+
 def dup_key(place: dict) -> tuple:
     """Build the dedup lookup key from a parsed place dict."""
     return (
         normalize_name(place["name"]),
         (place.get("city") or "").lower().strip(),
-        (place.get("country") or "").lower().strip(),
+        _normalize_country(place.get("country") or ""),
     )
