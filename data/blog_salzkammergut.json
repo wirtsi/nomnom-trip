@@ -1,0 +1,127 @@
+[
+  {
+    "name": "Das Attersee",
+    "address": "Hauptstraße 2, 4864 Attersee am Attersee",
+    "city": "Attersee am Attersee",
+    "region": "Oberösterreich",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Austrian, International",
+    "description": "Ibiza-Vibes am Attersee: chice Terrasse im Boho-Stil, regionale Zutaten, kreative Speisen und Blick über den See. Bar mit Signature-Drinks.",
+    "tags": [
+      "salzkammergut",
+      "see-restaurant",
+      "bar"
+    ],
+    "url": "https://www.dasattersee.at"
+  },
+  {
+    "name": "Belétage Traunkirchen",
+    "address": "Ortsplatz 5, 4801 Traunkirchen",
+    "city": "Traunkirchen",
+    "region": "Oberösterreich",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Austrian, Creative",
+    "description": "Food-Sharing-Konzept mit regionalen Köstlichkeiten am Traunsee. Holzfeuerküche, Bar mit 'Golden Age of Travel' Konzept.",
+    "tags": [
+      "salzkammergut",
+      "see-restaurant",
+      "sharing",
+      "bar"
+    ],
+    "url": "https://www.hotel-post-traunkirchen.at"
+  },
+  {
+    "name": "SeeSushi",
+    "address": "Weißenbachtalstraße 15, 5350 Strobl",
+    "city": "Strobl",
+    "region": "Salzburg",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Japanese, Sushi",
+    "description": "Sushi aus heimischem Fisch (Wolfgangseer Lachsforelle) im Salzkammergut.",
+    "tags": [
+      "salzkammergut",
+      "sushi",
+      "regional-fish"
+    ],
+    "url": "https://www.1000thingsmagazine.com/de/a/1026408/restaurants-im-salzkammergut/"
+  },
+  {
+    "name": "Tapaletta",
+    "address": "Altmünster am Traunsee",
+    "city": "Altmünster",
+    "region": "Oberösterreich",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Latin, Tapas, Bar",
+    "description": "Tapas Bar Restaurant am Traunsee im Salzkammergut. Lateinamerikanische Küche, Cocktails.",
+    "tags": [
+      "salzkammergut",
+      "tapas",
+      "cocktails"
+    ],
+    "url": "https://www.instagram.com/tapalettasee/"
+  },
+  {
+    "name": "Die Almwirtinnen",
+    "city": "Salzkammergut",
+    "region": "Oberösterreich",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Austrian, Regional",
+    "description": "Moderne Gerichte aus regionalen Zutaten im Salzkammergut.",
+    "tags": [
+      "salzkammergut",
+      "regional"
+    ],
+    "url": "https://www.1000thingsmagazine.com/de/a/1026408/restaurants-im-salzkammergut/"
+  },
+  {
+    "name": "Spoarherd Gastropub",
+    "city": "Bad Ischl",
+    "region": "Oberösterreich",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Austrian, Hungarian",
+    "description": "Ungarische Hausmannskost trifft altösterreichische Küche, verfeinert mit einem Hauch Moderne. Gemütlicher Gastropub in Bad Ischl.",
+    "tags": [
+      "salzkammergut",
+      "gastropub",
+      "hungarian"
+    ],
+    "url": "https://www.salzkammergut.at/en/oesterreich-gastronomie/detail/430007588/spoarherd-gastropub.html"
+  },
+  {
+    "name": "Hias Pizza",
+    "city": "Salzkammergut",
+    "region": "Oberösterreich",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Italian, Pizza",
+    "description": "Pizza wie bei Nonna im Salzkammergut.",
+    "tags": [
+      "salzkammergut",
+      "pizza",
+      "italian"
+    ],
+    "url": "https://www.1000thingsmagazine.com/de/a/1026408/restaurants-im-salzkammergut/"
+  },
+  {
+    "name": "Trauntown",
+    "address": "Adalbert-Stifter-Kai 3, 4820 Bad Ischl",
+    "city": "Bad Ischl",
+    "region": "Oberösterreich",
+    "country": "Austria",
+    "category": "restaurant",
+    "cuisine": "Austrian, International, Bar",
+    "description": "Restaurant und Bar in Bad Ischl mit zeitgeistigem Esprit. Spritz und Pommes, Kaiserstadt kulinarisch neu entdeckt.",
+    "tags": [
+      "salzkammergut",
+      "bar",
+      "bad-ischl"
+    ],
+    "url": "https://www.salzkammergut.at/en/oesterreich-gastronomie/detail/101615/trauntown.html"
+  }
+]
