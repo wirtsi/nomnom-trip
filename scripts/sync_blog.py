@@ -37,6 +37,7 @@ from typing import Optional
 sys.path.insert(0, str(Path(__file__).parent))
 import db  # noqa: E402
 import geocode  # noqa: E402
+from dedup import add_tag, build_dedup_map, dup_key  # noqa: E402
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
@@ -154,21 +155,53 @@ def _normalize(entry: dict, conn) -> Optional[dict]:
     }
 
 
+
+def _source_of(conn, place_id: int) -> str:
+    row = conn.execute("SELECT source FROM places WHERE id = ?", (place_id,)).fetchone()
+    return row["source"] if row else ""
+
 def sync() -> tuple[int, int]:
     added = updated = 0
     raw = load_entries()
     print(f"loaded {len(raw)} blog entries", file=sys.stderr)
     with db.connect() as conn:
         try:
+            # (norm_name, city, country) -> [place_id, ...], built once so a blog
+            # entry that matches an existing non-blog place tags it instead of
+            # inserting a cross-source duplicate.
+            dup_map = build_dedup_map(conn)
             for entry in raw:
                 if _already_exists(conn, entry):
                     continue
                 place = _normalize(entry, conn)
                 if not place:
                     continue
-                was_new, _ = db.upsert_place(conn, place)
+                key = dup_key(place)
+                real = [pid for pid in dup_map.get(key, []) if _source_of(conn, pid) != "blog"]
+                if real:
+                    # Fold this blog's tags onto the existing curated place, keep
+                    # its source_url reachable via canonical_links, and skip the
+                    # duplicate row.
+                    blog_tags = ["editorial", f"blog:{_blog_slug_from_url(place['source_url'])}"]
+                    blog_tags += entry.get("tags") or []
+                    for t in dict.fromkeys(blog_tags):
+                        if add_tag(conn, real[0], t):
+                            updated += 1
+                    conn.execute(
+                        "INSERT OR IGNORE INTO canonical_links (place_id, canonical_id) VALUES (?, ?)",
+                        (real[0], f"blog:{_blog_slug_from_url(place['source_url'])}"),
+                    )
+                    # Backfill description/address if the curated row lacks them.
+                    conn.execute(
+                        "UPDATE places SET description = COALESCE(description, ?), address = COALESCE(address, ?) WHERE id = ?",
+                        (place.get("description"), place.get("address"), real[0]),
+                    )
+                    conn.commit()
+                    continue
+                was_new, pid = db.upsert_place(conn, place)
                 if was_new:
                     added += 1
+                    dup_map.setdefault(key, []).append(pid)
                 else:
                     updated += 1
                 conn.commit()  # geocoding is slow, persist as we go
