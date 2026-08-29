@@ -21,7 +21,6 @@
   .card img { width:100%; height:200px; object-fit:cover; }
   .card-body { padding:18px; }
   .tag { display:inline-block; background:var(--ocean); color:#fff; font-size:.75rem; font-weight:600; padding:3px 10px; border-radius:14px; margin:0 6px 8px 0; }
-  .tag.miche { background:var(--oslo); }
   .tag.kid { background:var(--accent); color:#1d3557; }
   .tag.nature { background:var(--green); }
   .card a { color:var(--ocean); text-decoration:none; font-weight:600; }
@@ -34,6 +33,9 @@
   .badge { display:inline-block; background:#e0e0e0; padding:2px 10px; border-radius:12px; font-size:.8rem; font-weight:600; margin-right:6px; }
   .tip { background:var(--accent); color:#1d3557; border-radius:10px; padding:14px 18px; margin-top:10px; font-size:.95rem; }
   .tip strong { color:var(--oslo); }
+  .place-gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:20px; }
+  .place-gallery img { width:100%; height:170px; object-fit:cover; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+  .place-gallery figcaption { font-size:.85rem; color:var(--ink); margin-top:6px; text-align:center; }
   footer { text-align:center; padding:34px; background:var(--ink); color:#fff; font-size:.9rem; }
   @media (max-width:640px){ header{padding:36px 16px;} header h1{font-size:1.9rem;} .hero{height:220px;} }
 </style>
@@ -77,6 +79,36 @@
 </section>
 
 <section>
+  <h2>🏙️ Oslo — so sieht es aus</h2>
+  <div class="place-gallery">
+    <figure><img src="https://images.unsplash.com/photo-1516541196182-6bdb0516ed27?w=800" alt="Fjord bei Oslo"><figcaption>Fjord &amp; Wasser</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800" alt="Oslo Opernhaus"><figcaption>Opernhaus</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800" alt="Oslo Stadt"><figcaption>Stadt &amp; Hafen</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=800" alt="Skulpturenpark"><figcaption>Vigeland-Park</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>🏝️ Bohuslän-Schären — so sieht es aus</h2>
+  <div class="place-gallery">
+    <figure><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" alt="Schwedische Küste"><figcaption>Schärenküste</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800" alt="Fischerdorf"><figcaption>Fischerdorf</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800" alt="Seafood"><figcaption>Frischer Fisch</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1559678194-2d6ed0be0e9f?w=800" alt="Hafensteg"><figcaption>Smögenbryggan</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>🌆 Göteborg — so sieht es aus</h2>
+  <div class="place-gallery">
+    <figure><img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800" alt="Göteborg Hafen"><figcaption>Hafen</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800" alt="Vergnügungspark"><figcaption>Liseberg</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=800" alt="Schwedische Küche"><figcaption>Schwedische Küche</figcaption></figure>
+    <figure><img src="https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=800" alt="Stadtpark"><figcaption>Stadt &amp; Grün</figcaption></figure>
+  </div>
+</section>
+
+<section>
   <h2>🍽️ Essen in Oslo</h2>
   <div class="grid">
     <div class="card">
@@ -97,15 +129,6 @@
         <a href="https://guide.michelin.com/no/en/oslo-region/oslo/restaurant/sjomagasinet" target="_blank">Guide ↗</a>
       </div>
     </div>
-    <div class="card">
-      <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800" alt="Modernes Restaurant Oslo">
-      <div class="card-body">
-        <span class="tag miche">MICHELIN *</span>
-        <h3>Stallen</h3>
-        <p>Kreativ &amp; modern — eines von Oslos ausgezeichneten Restaurants.</p>
-        <a href="https://guide.michelin.com/no/en/oslo-region/oslo/restaurant/stallen" target="_blank">Guide ↗</a>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -113,7 +136,7 @@
   <h2>🦞 Essen an der Küste</h2>
   <div class="grid">
     <div class="card">
-      <img src="https://images.unsplash.com/photo-1559678194-2d6ed0be0e9f?w=800" alt="Smögen Hafen">
+      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800" alt="Seafood Grebbestad">
       <div class="card-body">
         <span class="tag kid">FAMILIEN-FAVORIT</span>
         <h3>Göstas Fiskekrog</h3>
@@ -122,21 +145,12 @@
       </div>
     </div>
     <div class="card">
-      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800" alt="Seafood Grebbestad">
+      <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800" alt="Schwedisches Küstendorf">
       <div class="card-body">
         <span class="tag">SEAFOOD</span>
         <h3>Q Skär Restaurang &amp; Bar</h3>
         <p>Am Grebbestad-Pier — Hummer &amp; Schalentier im klassischen Bohuslän-Ambiente.</p>
         <a href="https://www.yellowpages.net/places/SE/seafood-restaurant" target="_blank">Mehr ↗</a>
-      </div>
-    </div>
-    <div class="card">
-      <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800" alt="Schwedisches Küstendorf">
-      <div class="card-body">
-        <span class="tag">GOURMET</span>
-        <h3>Lea Lodge</h3>
-        <p>Smögens Gourmet-Adresse — Küche inspiriert vom Ozean, Taste of West Sweden Award.</p>
-        <a href="https://www.greentraveller.co.uk/post/places-to-eat-in-west-sweden" target="_blank">Mehr ↗</a>
       </div>
     </div>
   </div>
@@ -152,15 +166,6 @@
         <h3>Familjen</h3>
         <p>Skandinavisch &amp; schwedisch — modern, aber zugänglich, ideal mit Kids.</p>
         <a href="https://guide.michelin.com/se/en/vastra-gotaland/gothenburg/restaurant/familjen" target="_blank">Guide ↗</a>
-      </div>
-    </div>
-    <div class="card">
-      <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800" alt="Göteborg Restaurant">
-      <div class="card-body">
-        <span class="tag miche">MICHELIN *</span>
-        <h3>Koka</h3>
-        <p>Moderne Küche — einer der 1-Sterne in Göteborg.</p>
-        <a href="https://guide.michelin.com/se/en/vastra-gotaland/gothenburg/restaurant/koka" target="_blank">Guide ↗</a>
       </div>
     </div>
     <div class="card">
