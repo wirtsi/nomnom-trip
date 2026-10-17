@@ -1,5 +1,5 @@
 // Bumped by export_pwa_db.py alongside the DB cache-buster.
-const CACHE = "nomnom-favorites-20261017T171106Z";
+const CACHE = "nomnom-favorites-header-aligned-v1";
 const ASSETS = [
   "./",
   "./index.html",
