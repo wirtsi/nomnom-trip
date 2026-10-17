@@ -16,6 +16,8 @@ const els = {
   geo: document.getElementById("geo"),
   results: document.getElementById("results"),
   status: document.getElementById("status"),
+  favorites: document.getElementById("favorites"),
+  favoritesStatus: document.getElementById("favorites-status"),
 };
 // Fail loudly if the HTML template is missing an element we depend on,
 // instead of cryptic TypeError: Cannot read properties of null later.
@@ -27,6 +29,157 @@ let db = null;
 let map = null;
 let markerLayer = null;
 let lastCenter = null;
+let lastSearchRows = [];
+let lastSearchStatus = { msg: "Ready — search for a place to begin.", isError: false };
+let showingFavorites = false;
+let searchMapView = null;
+let renderedHearts = [];
+let locationRequest = 0;
+
+// ---- favorites — small snapshots, independent of the current DB/search ---
+const FAVORITES_KEY = "nomnom:favorites:v1";
+let favorites = new Map();
+
+function favoriteKey(place) {
+  if (!place || typeof place.source !== "string" || !place.source.trim()) return null;
+  const id = place.source_id;
+  const identity = (typeof id === "string" && id.trim() ? id : "") ||
+    (typeof id === "number" && Number.isFinite(id) ? String(id) : "") ||
+    (typeof place.source_url === "string" && place.source_url.trim() ? place.source_url : "");
+  return identity ? JSON.stringify([place.source, identity]) : null;
+}
+
+function safeSourceUrl(url) {
+  return typeof url === "string" && /^https?:\/\//i.test(url) ? url : "";
+}
+
+function favoriteSnapshot(place) {
+  if (!favoriteKey(place) || typeof place.name !== "string" || !place.name.trim()) return null;
+  const snapshot = {};
+  for (const field of ["source", "name", "address", "city", "country", "category", "cuisine", "description"]) {
+    snapshot[field] = typeof place[field] === "string" ? place[field] : "";
+  }
+  snapshot.source_id = typeof place.source_id === "string" ||
+    (typeof place.source_id === "number" && Number.isFinite(place.source_id))
+    ? String(place.source_id) : null;
+  snapshot.source_url = safeSourceUrl(place.source_url);
+  // Coordinates are optional. Never coerce null/strings into a location at 0,0.
+  snapshot.lat = Number.isFinite(place.lat) && Math.abs(place.lat) <= 90 ? place.lat : null;
+  snapshot.lng = Number.isFinite(place.lng) && Math.abs(place.lng) <= 180 ? place.lng : null;
+  let tags = place.tags;
+  if (typeof tags === "string") {
+    try { tags = JSON.parse(tags); } catch (_) { tags = []; }
+  }
+  snapshot.tags = Array.isArray(tags) ? tags.filter((tag) => typeof tag === "string") : [];
+  snapshot.endorsements = Array.isArray(place.endorsements) ? place.endorsements
+    .filter((e) => e && typeof e.source === "string")
+    .map((e) => ({ source: e.source, url: safeSourceUrl(e.url) })) : [];
+  return favoriteKey(snapshot) ? snapshot : null;
+}
+
+function readFavorites() {
+  let raw;
+  try {
+    raw = localStorage.getItem(FAVORITES_KEY);
+  } catch (_) {
+    els.favoritesStatus.textContent = "Favorites storage is unavailable. Changes could not be saved.";
+    return null;
+  }
+  const saved = new Map();
+  if (raw === null) return saved;
+  try {
+    const data = JSON.parse(raw);
+    if (!data || data.version !== 1 || !Array.isArray(data.places)) throw new Error("Invalid favorites format");
+    for (const place of data.places) {
+      const snapshot = favoriteSnapshot(place);
+      if (snapshot) saved.set(favoriteKey(snapshot), snapshot);
+    }
+  } catch (_) {
+    els.favoritesStatus.textContent = "Saved favorites could not be read. Save a restaurant to start a new list.";
+  }
+  return saved;
+}
+
+function isFavorite(place) {
+  return favorites.has(favoriteKey(place));
+}
+
+function updateHeart(button, place) {
+  const saved = isFavorite(place);
+  button.setAttribute("aria-pressed", String(saved));
+  button.setAttribute("aria-label", `${saved ? "Remove" : "Save"} ${place.name} ${saved ? "from" : "to"} favorites`);
+  button.innerHTML = `<span aria-hidden="true">${saved ? "♥" : "♡"}</span>`;
+  button.classList.toggle("is-favorite", saved);
+}
+
+function updateFavoritesUI() {
+  els.favorites.textContent = `${showingFavorites ? "Back to results · " : "♡ "}Favorites (${favorites.size})`;
+  els.favorites.setAttribute("aria-pressed", String(showingFavorites));
+  for (const { button, place } of renderedHearts) updateHeart(button, place);
+}
+
+function toggleFavorite(place) {
+  const snapshot = favoriteSnapshot(place);
+  if (!snapshot) {
+    els.favoritesStatus.textContent = "This restaurant could not be saved: missing source identity.";
+    return false;
+  }
+  // Re-read before writing, so a recent change in another tab isn't lost.
+  const next = readFavorites();
+  if (!next) return false;
+  const key = favoriteKey(snapshot);
+  if (next.has(key)) next.delete(key);
+  else next.set(key, snapshot);
+  try {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify({ version: 1, places: [...next.values()] }));
+  } catch (_) {
+    els.favoritesStatus.textContent = "Favorites could not be saved. Browser storage may be full or blocked; your list is unchanged.";
+    return false;
+  }
+  // Only claim success after storage accepts the write (including removals).
+  favorites = next;
+  els.favoritesStatus.textContent = "";
+  updateFavoritesUI();
+  if (showingFavorites) renderFavorites();
+  return true;
+}
+
+function renderFavorites() {
+  renderResults([...favorites.values()], null);
+  drawStatus(`${favorites.size} favorite${favorites.size === 1 ? "" : "s"} — all cities, regardless of search filters.`);
+}
+
+function setFavoritesView(show) {
+  if (show === showingFavorites) return;
+  if (_searchTimeout) clearTimeout(_searchTimeout);
+  _searchTimeout = null;
+  if (show && map?.getCenter) searchMapView = { center: map.getCenter(), zoom: map.getZoom() };
+  showingFavorites = show;
+  if (show) locationRequest++; // Invalidate pending GPS/reverse-geocoding callbacks.
+  updateFavoritesUI();
+  if (show) renderFavorites();
+  else {
+    renderResults(lastSearchRows, lastCenter);
+    if (searchMapView && map) map.setView(searchMapView.center, searchMapView.zoom);
+    drawStatus(lastSearchStatus.msg, lastSearchStatus.isError);
+  }
+}
+
+function initFavorites() {
+  favorites = readFavorites() || new Map();
+  updateFavoritesUI();
+  els.favorites.addEventListener("click", () => setFavoritesView(!showingFavorites));
+  window.addEventListener("storage", (event) => {
+    if (event.key !== FAVORITES_KEY && event.key !== null) return;
+    // Ignore similarly named sessionStorage changes; accessing storage may throw.
+    try { if (event.storageArea && event.storageArea !== localStorage) return; } catch (_) { return; }
+    const saved = readFavorites();
+    if (!saved) return;
+    favorites = saved;
+    updateFavoritesUI();
+    if (showingFavorites) renderFavorites();
+  });
+}
 
 // ---- haversine — mirror of db.py:haversine_km ---------------------------
 function haversineKm(lat1, lng1, lat2, lng2) {
@@ -151,15 +304,20 @@ function searchNear({
 // Module-level debounce for auto-reload on filter changes.
 let _searchTimeout = null;
 function autoSearch() {
-  if (_searchTimeout) return;
+  if (showingFavorites || _searchTimeout) return;
   _searchTimeout = setTimeout(() => {
     _searchTimeout = null;
-    runSearch(lastCenter);
+    if (!showingFavorites) runSearch(lastCenter);
   }, 250);
 }
 
 function setStatus(msg, isError = false) {
-  const spinner = db ? '' : '<span class="spinner"></span>';
+  lastSearchStatus = { msg, isError };
+  if (!showingFavorites) drawStatus(msg, isError);
+}
+
+function drawStatus(msg, isError = false) {
+  const spinner = db || showingFavorites || isError ? '' : '<span class="spinner"></span>';
   // spinner is trusted HTML; msg may contain user input — escape it.
   els.status.innerHTML = spinner + escapeHtml(msg);
   els.status.classList.toggle("error", isError);
@@ -185,7 +343,8 @@ function getSelectedSources() {
 }
 
 function sourceBadge(s) {
-  return `<span class="badge badge-${s}">${s}</span>`;
+  const badgeClass = SOURCES.includes(s) ? ` badge-${s}` : "";
+  return `<span class="badge${badgeClass}">${escapeHtml(s)}</span>`;
 }
 
 function escapeHtml(s) {
@@ -199,9 +358,12 @@ function escapeHtml(s) {
 
 function renderResults(rows, center) {
   els.results.innerHTML = "";
+  renderedHearts = [];
   if (markerLayer) markerLayer.clearLayers();
   if (!rows.length) {
-    els.results.innerHTML = `<p class="empty">No matches.</p>`;
+    els.results.innerHTML = showingFavorites
+      ? `<p class="empty">No favorites yet. Tap the ♡ heart on a restaurant to save it here. Favorites stay on this browser, across all cities.</p>`
+      : `<p class="empty">No matches.</p>`;
     return;
   }
   for (const r of rows) {
@@ -221,10 +383,11 @@ function renderResults(rows, center) {
       <header>
         <h3>${escapeHtml(r.name)}</h3>
         ${sourceBadge(r.source)}
+        <button type="button" class="favorite-heart" aria-pressed="false" aria-label="Save ${escapeHtml(r.name)} to favorites"><span aria-hidden="true">♡</span></button>
       </header>
       ${r.cuisine ? `<div class="cuisine">${escapeHtml(r.cuisine)}</div>` : ""}
       ${addr ? `<div class="addr">${escapeHtml(addr)}</div>` : ""}
-      <div class="meta">${r.distance_km.toFixed(2)} km away</div>
+      ${Number.isFinite(r.distance_km) ? `<div class="meta">${r.distance_km.toFixed(2)} km away</div>` : ""}
       ${endorseLine}
       ${
         r.description
@@ -232,28 +395,36 @@ function renderResults(rows, center) {
           : ""
       }
       <a class="source-link" href="${escapeHtml(
-        r.source_url
-      )}" target="_blank" rel="noopener">View on ${r.source} ↗</a>
+        safeSourceUrl(r.source_url)
+      )}" target="_blank" rel="noopener">View on ${escapeHtml(r.source)} ↗</a>
     `;
+    const heart = card.querySelector(".favorite-heart");
+    renderedHearts.push({ button: heart, place: r });
+    updateHeart(heart, r);
+    heart.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFavorite(r);
+    });
     card.addEventListener("click", () => {
-      if (r.lat != null && r.lng != null) {
+      if (map && r.lat != null && r.lng != null) {
         map.setView([r.lat, r.lng], 17);
       }
     });
     els.results.appendChild(card);
 
-    if (r.lat != null && r.lng != null) {
+    if (markerLayer && r.lat != null && r.lng != null) {
       const marker = L.marker([r.lat, r.lng]).bindPopup(
         `<b>${escapeHtml(r.name)}</b><br>${escapeHtml(
           r.cuisine || ""
-        )}<br><a href="${escapeHtml(r.source_url)}" target="_blank">${
-          r.source
+        )}<br><a href="${escapeHtml(safeSourceUrl(r.source_url))}" target="_blank" rel="noopener">${
+          escapeHtml(r.source)
         }</a>`
       );
       markerLayer.addLayer(marker);
     }
   }
-  if (center) {
+  if (center && markerLayer && map) {
     L.circleMarker([center.lat, center.lng], {
       radius: 8,
       color: "#ff6b35",
@@ -264,10 +435,15 @@ function renderResults(rows, center) {
     const bounds = markerLayer.getBounds();
     if (bounds.isValid()) map.fitBounds(bounds.pad(0.1));
     else map.setView([center.lat, center.lng], 13);
+  } else if (showingFavorites && markerLayer && map) {
+    const bounds = markerLayer.getBounds();
+    if (bounds.isValid()) map.fitBounds(bounds.pad(0.1));
   }
 }
 
 async function runSearch(center) {
+  locationRequest++;
+  setFavoritesView(false);
   if (!db) {
     setStatus("Database still loading…");
     return;
@@ -315,10 +491,13 @@ async function runSearch(center) {
   }
 
   setStatus(`${rows.length} result${rows.length === 1 ? "" : "s"}.`);
-  renderResults(rows, center);
+  lastSearchRows = rows;
+  if (!showingFavorites) renderResults(rows, center);
 }
 
 function useMyLocation() {
+  setFavoritesView(false);
+  const request = ++locationRequest;
   if (!navigator.geolocation) {
     setStatus("Geolocation not supported by this browser.", true);
     return;
@@ -326,6 +505,7 @@ function useMyLocation() {
   setStatus("Getting your location…");
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
+      if (request !== locationRequest) return;
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
       let display_name = "your location";
@@ -335,6 +515,7 @@ function useMyLocation() {
         const resp = await fetch(url, { headers: { Accept: "application/json" } });
         if (resp.ok) {
           const data = await resp.json();
+          if (request !== locationRequest) return;
           // Prefer city, town, village — fall back to display name
           display_name =
             data.address?.city ||
@@ -347,9 +528,11 @@ function useMyLocation() {
       } catch (_) {
         // silent fallback — keep "your location"
       }
-      runSearch({ lat, lng, display_name });
+      if (request === locationRequest) runSearch({ lat, lng, display_name });
     },
-    (err) => setStatus(`Location error: ${err.message}`, true),
+    (err) => {
+      if (request === locationRequest) setStatus(`Location error: ${err.message}`, true);
+    },
     { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
   );
 }
@@ -387,7 +570,7 @@ function wireEvents() {
   els.radius.addEventListener("input", () => {
     els.radiusLabel.textContent = `${els.radius.value} km`;
   });
-  els.radius.addEventListener("change", () => runSearch(lastCenter));
+  els.radius.addEventListener("change", autoSearch);
   els.radiusLabel.textContent = `${els.radius.value} km`;
   els.search.addEventListener("click", () => runSearch(null));
   els.q.addEventListener("keydown", (e) => {
@@ -404,6 +587,7 @@ function wireEvents() {
     renderSourceCheckboxes();
     initMap();
     wireEvents();
+    initFavorites();
     await loadDb();
   } catch (e) {
     setStatus(`Startup failed: ${e.message}`, true);
